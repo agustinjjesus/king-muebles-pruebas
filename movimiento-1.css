@@ -1,0 +1,74 @@
+/* Idea 1: la Cama KNG se abre mientras bajás.
+   La sección es alta (hay que "recorrerla") y adentro queda fija la imagen: el scroll elige el cuadro
+   de la apertura (64 cuadros del video 3) y los textos se van prendiendo a medida que se abre cada parte. */
+
+.abrir { position: relative; height: 320vh; background: var(--hueso); }
+.abrir-fijo {
+  position: sticky; top: 72px;                 /* debajo de la cabecera */
+  height: calc(100vh - 72px); height: calc(100svh - 72px);
+  display: flex; align-items: center; overflow: hidden;
+}
+.abrir-grilla { display: grid; gap: 18px; align-items: center; }
+
+/* imagen */
+.abrir-imagen { position: relative; justify-self: center; width: min(100%, calc((100svh - 72px) * 0.52)); }
+.abrir-imagen canvas, .abrir-imagen .abrir-respaldo { width: 100%; height: auto; aspect-ratio: 4 / 5; display: block; background: #ebe8e2; }
+.abrir-imagen canvas { position: absolute; inset: 0; height: auto; }
+.abrir-pista {
+  position: absolute; left: 0; right: 0; bottom: 14px; margin: 0; text-align: center;
+  font-size: 12px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--tinta);
+  transition: opacity 0.4s ease;
+}
+.abrir-pista span { display: inline-block; animation: abrir-flecha 1.6s ease-in-out infinite; }
+@keyframes abrir-flecha { 50% { transform: translateY(4px); } }
+.abrir-barra { height: 2px; background: var(--linea); margin-top: 10px; }
+.abrir-barra span { display: block; height: 100%; width: 100%; background: var(--tinta); transform-origin: left; transform: scaleX(0); }
+
+/* textos */
+.abrir-textos .eyebrow { margin-bottom: 8px; }
+.abrir-titulo { font-size: clamp(22px, 5.6vw, 44px); text-wrap: balance; max-width: 14em; margin-bottom: 14px; }
+.abrir-pasos { list-style: none; margin: 0; padding: 0; display: flex; gap: 18px; flex-wrap: wrap; }
+.abrir-pasos li { color: var(--gris-claro); transition: color 0.35s ease, transform 0.35s ease, opacity 0.35s ease; opacity: 0.55; transform: translateY(4px); }
+.abrir-pasos li strong { display: block; font-weight: 500; font-size: 17px; }
+.abrir-pasos li span { display: none; font-size: 14px; font-weight: 300; }
+.abrir-pasos li.prendido { color: var(--tinta); opacity: 1; transform: none; }
+.abrir-final { margin-top: 14px; opacity: 0; transform: translateY(8px); transition: opacity 0.4s ease, transform 0.4s ease; }
+.abrir-final.prendido { opacity: 1; transform: none; }
+.abrir-final p { margin: 0 0 10px; font-size: 15px; color: var(--gris); }
+.abrir-precio { color: var(--tinta); font-weight: 500; white-space: nowrap; }
+
+/* celular: imagen arriba, textos abajo, todo en una pantalla */
+@media (max-width: 899px) {
+  .abrir-fijo { align-items: flex-start; padding-top: 16px; }
+  .abrir-imagen { width: min(100%, calc((100svh - 72px) * 0.5)); order: -1; }
+  .abrir-textos { text-align: left; }
+}
+@media (max-height: 700px) and (max-width: 899px) {
+  .abrir-titulo { font-size: 20px; }
+  .abrir-imagen { width: min(100%, calc((100svh - 72px) * 0.44)); }
+}
+
+/* compu: textos a la izquierda, cama a la derecha */
+@media (min-width: 900px) {
+  .abrir-grilla { grid-template-columns: minmax(0, 1fr) auto; gap: 64px; }
+  .abrir-imagen { width: calc((100svh - 72px - 64px) * 0.8); max-width: 560px; }
+  .abrir-pasos { flex-direction: column; gap: 18px; border-left: 1px solid var(--linea); padding-left: 22px; }
+  .abrir-pasos li strong { font-size: 26px; }
+  .abrir-pasos li span { display: block; color: var(--gris); }
+  .abrir-pasos li { position: relative; }
+  .abrir-pasos li::before {   /* la marca de la línea se pinta cuando se prende el paso */
+    content: ""; position: absolute; left: -23px; top: 0; bottom: 0; width: 1px;
+    background: var(--tinta); transform: scaleY(0); transform-origin: top; transition: transform 0.4s ease;
+  }
+  .abrir-pasos li.prendido::before { transform: scaleY(1); }
+  .abrir-final { margin-top: 28px; }
+  .abrir-final p { font-size: 17px; }
+}
+
+/* quien tiene las animaciones apagadas en el celular: la cama abierta y todos los textos, sin recorrido */
+@media (prefers-reduced-motion: reduce) {
+  .abrir { height: auto; }
+  .abrir-fijo { position: static; height: auto; padding: 56px 0; }
+  .abrir-pasos li, .abrir-final { opacity: 1; transform: none; color: var(--tinta); }
+  .abrir-pista, .abrir-barra, .abrir-imagen canvas { display: none; }
+}

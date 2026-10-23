@@ -1,0 +1,20 @@
+/* Solo para el sitio de pruebas: la barra de arriba que dice qué idea estás viendo, y la página para elegir. */
+
+.barra-prueba { background: var(--tinta); color: var(--papel); font-size: 12px; letter-spacing: 0.04em; }
+.barra-prueba .contenedor { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; padding: 9px 0; }
+.barra-prueba a { color: var(--papel); text-underline-offset: 3px; }
+
+.elegir { padding: 56px 0 88px; }
+.elegir h1 { font-size: clamp(32px, 5vw, 52px); margin-bottom: 14px; }
+.elegir .lead { margin: 0 0 40px; }
+.elegir-lista { display: grid; gap: 20px; }
+@media (min-width: 900px) { .elegir-lista { grid-template-columns: 1fr 1fr; gap: 28px; } }
+.elegir-opcion {
+  display: grid; gap: 18px; padding: 22px; text-decoration: none;
+  border: 1px solid var(--linea); transition: border-color 0.25s ease;
+}
+.elegir-opcion:hover { border-color: var(--tinta); }
+.elegir-opcion img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: var(--hueso); }
+.elegir-opcion h2 { font-size: 26px; }
+.elegir-opcion p { margin: 6px 0 0; color: var(--gris); font-weight: 300; }
+.elegir-opcion .link-flecha { justify-self: start; }

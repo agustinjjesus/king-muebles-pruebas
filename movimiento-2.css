@@ -1,0 +1,58 @@
+/* Idea 2: movimiento suave en todo el sitio. Nada salta ni se mueve solo de un lado a otro:
+   las cosas aparecen cuando llegás, las camas se abren en la foto y hay un video quieto, en loop. */
+
+/* aparecer al bajar (las clases las pone movimiento-2.js; sin JS se ve todo normal) */
+.con-movimiento .aparece {
+  opacity: 0; transform: translateY(22px);
+  transition: opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--retraso, 0s);
+}
+.con-movimiento .aparece.visible { opacity: 1; transform: none; }
+
+/* portada: entra por partes al abrir la página */
+@keyframes entrar { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.con-movimiento .portada .eyebrow,
+.con-movimiento .portada h1,
+.con-movimiento .portada .lead,
+.con-movimiento .portada .acciones { animation: entrar 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.con-movimiento .portada h1 { animation-delay: 0.08s; }
+.con-movimiento .portada .lead { animation-delay: 0.2s; }
+.con-movimiento .portada .acciones { animation-delay: 0.3s; }
+
+/* tarjetas de camas: la foto abierta aparece encima de la cerrada al pasar el mouse
+   (en el celular, cuando la tarjeta pasa por el medio de la pantalla) */
+.producto .foto { position: relative; }
+.producto .foto .abierta-foto { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s ease, transform 0.5s ease; }
+.producto.abierta .foto .abierta-foto { opacity: 1; }
+@media (hover: hover) { .producto:hover .foto .abierta-foto { opacity: 1; } }
+.producto .foto .que-ves {
+  position: absolute; left: 0; bottom: 0; z-index: 1;
+  padding: 6px 10px; background: rgba(255, 255, 255, 0.92);
+  font-size: 10px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--tinta);
+}
+.producto .foto .que-ves::after { content: "Cerrada"; }
+.producto.abierta .foto .que-ves::after { content: "Abierta"; }
+@media (hover: hover) { .producto:hover .foto .que-ves::after { content: "Abierta"; } }
+
+/* la sección del video: texto a un lado, la cama girando al otro */
+.en-video-grilla { display: grid; gap: 32px; align-items: center; }
+.en-video-texto h2 { margin-bottom: 16px; text-wrap: balance; }
+.en-video-texto .lead { margin: 0 0 24px; }
+.en-video-medio video { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; background: #ebe8e2; }
+@media (min-width: 900px) {
+  .en-video-grilla { grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr); gap: 72px; }
+}
+
+/* muestrario: cada color se acerca un poquito al pasar el mouse */
+.muestrario li { overflow: hidden; }
+.muestrario li img { transition: transform 0.5s ease; }
+@media (hover: hover) { .muestrario li:hover img { transform: scale(1.05); } }
+
+/* cabecera: una sombra finita cuando bajaste */
+.cabecera { transition: box-shadow 0.3s ease; }
+.cabecera.con-sombra { box-shadow: 0 6px 24px rgba(20, 20, 20, 0.06); }
+
+@media (prefers-reduced-motion: reduce) {
+  .con-movimiento .aparece { opacity: 1; transform: none; transition: none; }
+  .con-movimiento .portada * { animation: none !important; }
+}
