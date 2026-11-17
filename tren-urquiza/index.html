@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tren Urquiza: horarios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Doto:wght@700;900&display=swap">
+<style>
+/* Plan: una columna en el celular; en pantallas anchas, controles + tablero + lista a la izquierda y el recorrido a la derecha.
+   El tablero del andén (LED ámbar sobre negro) es el único elemento llamativo; todo lo demás es tranquilo y muy legible. */
+:root{
+  --bg:#edf1ef;
+  --surface:#ffffff;
+  --ink:#14211e;
+  --muted:#5a6b67;
+  --rule:#d3dcd9;
+  --line:#0a8577;
+  --line-soft:#d6ebe7;
+  --led:#ffb21c;
+  --board:#0c1211;
+  --board-ink:#c9d4d1;
+  --font-body:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-led:"Doto", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --rowh:34px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1312; --surface:#151f1d; --ink:#e5edeb; --muted:#93a6a1; --rule:#26342f;
+    --line:#2fc2b0; --line-soft:#173a35; --board:#050807; --board-ink:#aebcb8;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1312; --surface:#151f1d; --ink:#e5edeb; --muted:#93a6a1; --rule:#26342f;
+  --line:#2fc2b0; --line-soft:#173a35; --board:#050807; --board-ink:#aebcb8;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:17px;line-height:1.45;-webkit-text-size-adjust:100%}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--led);outline-offset:2px}
+h1,h2{text-wrap:balance;margin:0}
+.tab{font-variant-numeric:tabular-nums}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px 10px;max-width:1120px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:10px}
+.brand h1{font-size:21px;letter-spacing:.01em}
+.brand .sub{display:block;font-size:13px;color:var(--muted);font-weight:400}
+.roundel{width:30px;height:30px;border-radius:50%;border:5px solid var(--line);position:relative;flex:none}
+.roundel::after{content:"";position:absolute;left:-7px;right:-7px;top:50%;height:6px;margin-top:-3px;background:var(--line);border-radius:2px}
+.clock{font-family:var(--font-led);font-weight:900;font-size:26px;color:var(--ink);letter-spacing:.04em}
+
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px 40px;display:grid;gap:16px}
+@media (min-width:900px){
+  .wrap{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);align-items:start}
+  .col-b{position:sticky;top:12px}
+}
+.col-a,.col-b{display:grid;gap:16px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:14px}
+
+/* Controles */
+.route{display:grid;grid-template-columns:1fr auto;gap:8px 10px;align-items:end}
+.field{display:grid;gap:4px}
+.field label{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+select{appearance:none;-webkit-appearance:none;width:100%;padding:11px 36px 11px 12px;border-radius:10px;border:1px solid var(--rule);background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23889a96' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 12px center;font-weight:700;font-size:18px}
+.swap{grid-row:1 / span 2;grid-column:2;align-self:center;width:48px;height:48px;border-radius:50%;border:1px solid var(--rule);background:var(--bg);cursor:pointer;font-size:22px;line-height:1}
+.swap:hover{border-color:var(--line)}
+.favs{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{border:1px solid var(--rule);background:var(--bg);border-radius:999px;padding:7px 12px;font-size:15px;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--line);border-color:var(--line);color:#fff}
+.chip.ghost{background:transparent;border-style:dashed;color:var(--muted)}
+.when{display:grid;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--rule)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{border:1px solid var(--rule);background:var(--bg);border-radius:8px;padding:7px 11px;font-size:15px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.time{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.time label{font-size:15px;color:var(--muted)}
+.time input{padding:7px 10px;border-radius:8px;border:1px solid var(--rule);background:var(--bg);font-weight:700}
+.time .now{border:0;background:none;color:var(--line);font-weight:700;cursor:pointer;padding:6px 4px;text-decoration:underline;text-underline-offset:3px}
+.live{font-size:14px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--line);display:inline-block}
+
+/* Tablero */
+.board{background:var(--board);color:var(--board-ink);border-radius:16px;padding:16px 18px 18px;position:relative;overflow:hidden;
+  background-image:radial-gradient(rgba(255,255,255,.045) 1px, transparent 1.2px);background-size:6px 6px}
+.board-head{display:flex;justify-content:space-between;gap:12px;font-size:13px;text-transform:uppercase;letter-spacing:.09em;font-weight:700}
+.board-head .r{color:#fff;text-transform:none;letter-spacing:0;font-size:15px;text-align:right}
+.board-main{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin:6px 0 4px}
+.led{font-family:var(--font-led);font-weight:900;color:var(--led);font-size:clamp(64px,19vw,96px);line-height:1;letter-spacing:.02em;text-shadow:0 0 18px rgba(255,178,28,.35)}
+.cd{font-size:22px;font-weight:700;color:#fff}
+.cd small{display:block;font-size:14px;font-weight:400;color:var(--board-ink)}
+.board-foot{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:16px}
+.board-foot b{color:#fff}
+.board.empty .led{font-size:clamp(40px,10vw,56px)}
+.flip{animation:flip .45s ease-out}
+@keyframes flip{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+
+.facts{display:flex;flex-wrap:wrap;gap:8px}
+.fact{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:8px 12px;font-size:15px}
+.fact b{font-size:18px}
+
+/* Lista */
+.list-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px}
+h2{font-size:15px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+ol.trains{list-style:none;margin:0;padding:0;display:grid}
+.trow{width:100%;display:grid;grid-template-columns:auto auto auto 1fr auto;align-items:baseline;gap:10px;padding:11px 8px;border:0;border-top:1px solid var(--rule);background:transparent;text-align:left;cursor:pointer;border-radius:0}
+ol.trains li:first-child .trow{border-top:0}
+.trow:hover{background:var(--bg)}
+.trow[aria-current="true"]{background:var(--line-soft);box-shadow:inset 4px 0 0 var(--line)}
+.trow .dep{font-weight:700;font-size:21px}
+.trow .ar{color:var(--muted)}
+.trow .arr{font-size:18px}
+.trow .dur{color:var(--muted);font-size:15px}
+.trow .in{font-weight:700;font-size:15px;color:var(--line);text-align:right;white-space:nowrap}
+.trow.past{opacity:.45}
+.trow.past .in{color:var(--muted);font-weight:400}
+.tag{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border:1px solid var(--rule);border-radius:5px;padding:1px 5px;color:var(--muted);margin-left:4px;vertical-align:2px}
+.more{margin-top:10px;width:100%;padding:11px;border-radius:10px;border:1px solid var(--rule);background:var(--bg);font-weight:700;cursor:pointer}
+.msg{padding:12px 4px;color:var(--muted)}
+
+/* Recorrido */
+.trip-status{margin:4px 0 12px;font-size:16px}
+.trip-status b{color:var(--line)}
+.diagram{position:relative;padding:4px 0}
+.drow{display:grid;grid-template-columns:58px 60px 1fr;align-items:center;height:var(--rowh)}
+.drow .t{text-align:right;color:var(--muted);font-size:15px}
+.drow .n{font-size:15px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.drow.on .t,.drow.on .n{color:var(--ink)}
+.drow.end .n{font-weight:700;font-size:16px}
+.drow.end .t{font-weight:700;color:var(--ink);font-size:16px}
+.drow .n .tag{border-color:var(--line);color:var(--line)}
+.dot{justify-self:center;width:12px;height:12px;border-radius:50%;background:var(--surface);border:3px solid var(--rule);position:relative;z-index:2}
+.drow.on .dot{border-color:var(--line)}
+.drow.end .dot{width:18px;height:18px;border-width:4px;background:var(--line)}
+.rail,.rail-on{position:absolute;left:calc(58px + 30px - 2px);width:4px;border-radius:2px;z-index:1}
+.rail{background:var(--rule)}
+.rail-on{background:var(--line);width:6px;margin-left:-1px}
+.mk{position:absolute;z-index:3;transform:translate(-50%,-50%);pointer-events:none;transition:top .8s linear}
+.mk.me{width:26px;height:26px;border-radius:50%;background:var(--led);border:3px solid var(--board);box-shadow:0 0 0 3px var(--led)}
+.mk.me::after{content:"";position:absolute;inset:-9px;border-radius:50%;border:2px solid var(--led);animation:pulse 1.8s ease-out infinite}
+@keyframes pulse{from{opacity:.9;transform:scale(.6)}to{opacity:0;transform:scale(1.35)}}
+.mk.same,.mk.opp{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent}
+.mk.same{border-top:11px solid var(--ink)}
+.mk.opp{border-bottom:11px solid var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted);margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.lg-me{width:12px;height:12px;border-radius:50%;background:var(--led);display:inline-block}
+.lg-same{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid var(--ink);display:inline-block}
+.lg-opp{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:9px solid var(--muted);display:inline-block}
+
+footer{font-size:14px;color:var(--muted);max-width:65ch}
+footer p{margin:0 0 8px}
+@media (min-width:900px){footer{grid-column:1 / -1}}
+@media (prefers-reduced-motion: reduce){
+  .flip,.mk.me::after{animation:none}
+  .mk{transition:none}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="roundel" aria-hidden="true"></span>
+    <h1>Tren Urquiza <span class="sub">Horarios Lacroze ↔ Lemos</span></h1>
+  </div>
+  <div class="clock tab" id="clock" aria-label="Hora actual">--:--</div>
+</header>
+
+<main class="wrap">
+  <div class="col-a">
+    <section class="card" aria-label="Elegir viaje">
+      <div class="route">
+        <div class="field"><label for="from">Desde</label><select id="from"></select></div>
+        <button class="swap" id="swap" type="button" aria-label="Invertir el viaje" title="Invertir">⇅</button>
+        <div class="field"><label for="to">Hasta</label><select id="to"></select></div>
+      </div>
+      <div class="favs" id="favs"></div>
+      <div class="when">
+        <div class="seg" id="days" role="group" aria-label="Qué horario usar"></div>
+        <div class="time">
+          <label for="at">Salgo a las</label>
+          <input type="time" id="at" class="tab">
+          <span id="liveTag" class="live"><i></i>en vivo</span>
+          <button type="button" class="now" id="nowBtn" hidden>Volver a ahora</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="board" id="board" aria-live="polite">
+      <div class="board-head"><span>Próximo tren</span><span class="r" id="bRoute"></span></div>
+      <div class="board-main"><div class="led tab" id="bDep">--:--</div><div class="cd" id="bIn"></div></div>
+      <div class="board-foot" id="bFoot"></div>
+    </section>
+
+    <div class="facts" id="facts"></div>
+
+    <section class="card">
+      <div class="list-head"><h2 id="listTitle">Siguientes trenes</h2></div>
+      <ol class="trains" id="list"></ol>
+      <button class="more" id="moreBtn" type="button">Ver todos los del día</button>
+    </section>
+  </div>
+
+  <div class="col-b">
+    <section class="card" aria-label="Recorrido del tren">
+      <h2 id="tripTitle">Recorrido</h2>
+      <p class="trip-status" id="tripStatus"></p>
+      <div class="diagram" id="diagram"></div>
+      <div class="legend">
+        <span><i class="lg-me"></i>tu tren</span>
+        <span><i class="lg-same"></i>otros trenes, mismo sentido</span>
+        <span><i class="lg-opp"></i>sentido contrario</span>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <p>Horarios copiados del cuadro oficial «Invierno 2024» de la línea Urquiza (Lacroze – General Lemos). Si los horarios cambiaron después, esta página no lo sabe: ante la duda, confirmá en la estación.</p>
+    <p>La posición de los trenes en el recorrido es la que marca el horario, no un GPS. Los feriados nacionales se detectan solos; si hoy es feriado y no aparece así, tocá «Feriado».</p>
+  </footer>
+</main>
+
+<script id="data" type="application/json">{"habil":{"L":["60|3222222222322141322223","160|3222222222322141322223","215|3222222222322141322223","260|3222222222222141322223","275|3222222222222141322223","300|3222222222222141322223","314|3222222222222141322223","324|3222222222222141322223","334|3222222222222141322223","344|3222222222222141322223","352|3222222222222141322223","359|3222222222322141222223","367|3222222222322141222223","375|3222222222322141222223","383|3222222222322141222223","391|3222222222322141222223","399|3222222222322141222223","407|3222222222322141222223","415|3222222222322141222223","423|3222222222322141222223","431|3222222222322141222223","439|3222222222322141222223","447|3222222222322141222223","455|3222222222322141222223","467|3222222222322141222223","477|3222222222322141222223","487|3222222222322141222223","497|3222222222322141222223","507|3222222222322141222223","517|3222222222322141222223","532|3222222222322141222223","547|3222222222322141222223","562|3222222222322141222223","579|3222222222322141222223","599|3222222222322141222223","615|3222222222322141222223","630|3222222222322141222223","645|3222222222322141222223","660|3222222222322141222223","675|3222222222322141222223","690|3222222222322141222223","705|3222222222322141222223","720|3222222222322141222223","735|3222222222322141222223","750|3222222222322141222223","765|3222222222322141222223","780|3222222222322141222223","795|3222222222322141222223","810|3222222222322141222223","825|3222222222322141222223","840|3222222222322141222223","855|3222222222322141222223","870|3222222222322141222223","885|3222222222322141222223","900|3222222222322141222223","915|3222222222322141222223","930|3222222222322141222223","945|3222222222322141222223","960|3222222222322141322223","975|3222222222322141322223","990|3222222222322141322223","1005|3222222222322141322223","1020|3222222222322141322223","1030|3222222222322141322223","1040|3222222222322141322223","1050|3222222222322141322223","1060|3222222222322141322223","1070|3222222222322141322223","1080|3222222222322141322223","1090|3222222222322141322223","1100|3222222222322141322223","1110|3222222222322141322223","1120|3222222222322141322223","1130|3222222222322141322223","1140|3222222222322141322223","1150|3222222222322141322223","1160|3222222222322141322223","1170|3222222222322141322223","1180|3222222222322141322223","1190|3222222222322141322223","1200|3222222222322141322223","1215|3222222222322141322223","1230|3222222222322141322223","1245|3222222222322141322223","1260|3222222222322141322223","1280|3222222222322141322223","1300|3222222222322141322223","1320|3222222222322141322223","1340|3222222222322141322223","1360|3222222222322141322223","1386|3222222222322141322223","1430|3222222222322141322223"],"C":["60|2212232422232222211325","150|2212232422232222211325","225|2212232422232222211325","270|2212232422232222211325","285|2212232422232222211325","300|2212232422332222211325","315|2212232422332222211325","330|2212232422332222211325","340|2212232422332222211325","351|2212232422332222211325","361|2212232422332222221325","371|2212232422332222221325","381|2212232422332222221325","391|2212232422332222221325","399|2212232422332222221325","406|2212232422332222221325","414|2212232422332222221325","422|2212232422332222221325","430|2212232422332222221325","438|2212232422332222221325","446|2212232422332222221325","454|2212232422332222221325","462|2212232422332222221325","470|2212232422332222221325","478|2212232422332222221325","486|2212232422332222221325","494|2212232422332222221325","502|2212232422332222221325","509|2212232422332222221325","519|2212232422332222221325","529|2212232422332222221325","539|2212232422332222221325","549|2212232422332222221325","559|2212232422332222221325","569|2212232422332222221325","584|2212232422332222221325","599|2212232422332222221325","614|2212232422332222221325","631|2212232422332222221325","651|2212232422332222221325","667|2212232422332222221325","682|2212232422332222221325","697|2212232422332222211325","712|2212232422332222211325","727|2212232422332222221325","742|2212232422332222211325","757|2212232422332222211325","772|2212232422332222211325","787|2212232422332222221325","802|2212232422332222211325","817|2212232422332222211325","832|2212232422332222211325","847|2212232422332222221325","862|2212232422332222211325","877|2212232422332222211325","892|2212232422332222211325","907|2212232422332222221325","922|2212232422332222211325","937|2212232422332222211325","952|2212232422332222211325","967|2212232422332222221325","982|2212232422332222211325","997|2212232422332222211325","1013|2212232422332222211325","1028|2212232422332222211325","1043|2212232422332222211325","1058|2212232422332222211325","1073|2212232422332222211325","1083|2212232422332222211325","1093|2212232422332222211325","1103|2212232422332222211325","1113|2212232422332222211325","1123|2212232422332222211325","1133|2212232422332222211325","1143|2212232422332222211325","1153|2212232422332222211325","1163|2212232422332222211325","1173|2212232422332222211325","1183|2212232422332222211325","1193|2212232422332222211325","1203|2212232422332222211325","1213|2212232422332222211325","1223|2212232422332222211325","1243|2212232422232222211325","1263|2212232422232222211325","1283|2212232422232222211325","1301|2212232422232222211325","1321|2212232422232222211325","1333|2212232422232222211325","1353|2212232422232222211325","1373|2212232422232222211325","1401|2212232422232222211325","1439|2212232422232222211325"]},"sabado":{"L":["60|3222222222222141222223","160|3222222222222141222223","215|3222222222222141222223","280|3222222222222141222223","300|3222222222322141222223","320|3222222222322141222223","340|3222222222322141222223","360|3222222222322141222223","375|3222222222322141222223","390|3222222222322141222223","405|3222222222322141222223","420|3222222222322141222223","435|3222222222322141222223","450|3222222222322141222223","465|3222222222322141222223","480|3222222222322141222223","495|3222222222322141222223","510|3222222222322141222223","525|3222222222322141222223","540|3222222222322141222223","555|3222222222322141222223","570|3222222222322141222223","585|3222222222322141222223","600|3222222222322141222223","615|3222222222322141222223","630|3222222222322141222223","645|3222222222322141222223","660|3222222222322141222223","675|3222222222322141222223","690|3222222222322141222223","705|3222222222322141222223","720|3222222222322141222223","740|3222222222322141222223","760|3222222222322141222223","780|3222222222322141222223","800|3222222222322141222223","820|3222222222322141222223","840|3222222222322141222223","860|3222222222322141222223","880|3222222222322141222223","900|3222222222322141222223","920|3222222222322141222223","940|3222222222322141222223","960|3222222222322141222223","980|3222222222322141222223","1000|3222222222322141222223","1020|3222222222322141222223","1040|3222222222322141222223","1060|3222222222322141222223","1080|3222222222322141222223","1100|3222222222322141222223","1120|3222222222322141222223","1140|3222222222322141222223","1160|3222222222322141222223","1180|3222222222322141222223","1200|3222222222322141222223","1223|3222222222322141222223","1253|3222222222322141222223","1283|3222222222322141222223","1313|3222222222322141222223","1343|3222222222322141222223","1373|3222222222322141222223","1391|3222222222322141222223","1430|3222222222322141222223"],"C":["60|2212232422232222211325","150|2212232422232222211325","225|2212232422232222211325","270|2212232422232222211325","300|2212232422332222211325","330|2212232422332222211325","352|2212232422332222211325","372|2212232422332222211325","392|2212232422332222211325","412|2212232422332222211325","427|2212232422332222211325","442|2212232422332222211325","457|2212232422332222211325","472|2212232422332222211325","487|2212232422332222211325","502|2212232422332222211325","517|2212232422332222211325","532|2212232422332222211325","547|2212232422332222211325","562|2212232422332222211325","577|2212232422332222211325","592|2212232422332222211325","607|2212232422332222211325","622|2212232422332222211325","637|2212232422332222211325","652|2212232422332222211325","667|2212232422332222211325","682|2212232422332222211325","697|2212232422332222211325","712|2212232422332222211325","727|2212232422332222211325","742|2212232422332222211325","757|2212232422332222211325","772|2212232422332222211325","792|2212232422332222211325","812|2212232422332222211325","832|2212232422332222211325","852|2212232422332222211325","872|2212232422332222211325","892|2212232422332222211325","912|2212232422332222211325","932|2212232422332222211325","952|2212232422332222211325","972|2212232422332222211325","992|2212232422332222211325","1012|2212232422332222211325","1032|2212232422332222211325","1052|2212232422332222211325","1072|2212232422332222211325","1092|2212232422332222211325","1112|2212232422332222211325","1132|2212232422332222211325","1152|2212232422332222211325","1172|2212232422332222211325","1192|2212232422332222211325","1212|2212232422332222211325","1232|2212232422332222211325","1252|2212232422332222211325","1288|2212232422332222211325","1308|2212232422332222211325","1338|2212232422332222211325","1368|2212232422332222211325","1398|2212232422332222211325","1428|2212232422332222211325"]},"domingo":{"L":["60|3222222222322141222223","265|3222222222322141222223","315|3222222222322141222223","360|3222222222322141222223","390|3222222222322141222223","420|3222222222322141222223","450|3222222222322141222223","480|3222222222322141222223","510|3222222222322141222223","540|3222222222322141222223","570|3222222222322141222223","600|3222222222322141222223","630|3222222222322141222223","660|3222222222322141222223","690|3222222222322141222223","720|3222222222322141222223","750|3222222222322141222223","780|3222222222322141222223","810|3222222222322141222223","840|3222222222322141222223","870|3222222222322141222223","900|3222222222322141222223","930|3222222222322141222223","960|3222222222322141222223","990|3222222222322141222223","1020|3222222222322141222223","1050|3222222222322141222223","1080|3222222222322141222223","1110|3222222222322141222223","1140|3222222222322141222223","1170|3222222222322141222223","1200|3222222222322141222223","1230|3222222222322141222223","1260|3222222222322141222223","1290|3222222222322141222223","1320|3222222222322141222223","1360|3222222222322141222223","1430|3222222222322141222223"],"C":["1|2212232422332222211325","192|2212232422332222211325","255|2212232422332222211325","330|2212232422332222211325","380|2212232422332222211325","415|2212232422332222211325","445|2212232422332222211325","475|2212232422332222211325","505|2212232422332222211325","535|2212232422332222211325","565|2212232422332222211325","595|2212232422332222211325","625|2212232422332222211325","655|2212232422332222211325","685|2212232422332222211325","715|2212232422332222211325","745|2212232422332222211325","775|2212232422332222211325","805|2212232422332222211325","835|2212232422332222211325","865|2212232422332222211325","895|2212232422332222211325","925|2212232422332222211325","955|2212232422332222211325","985|2212232422332222211325","1015|2212232422332222211325","1045|2212232422332222211325","1075|2212232422332222211325","1105|2212232422332222211325","1135|2212232422332222211325","1165|2212232422332222211325","1195|2212232422332222211325","1225|2212232422332222211325","1255|2212232422332222211325","1285|2212232422332222211325","1315|2212232422332222211325","1345|2212232422332222211325","1375|2212232422332222211325","1415|2212232422332222211325"]},"flags":{"noFeriado":{"domingo":{"C":[0]}}}}</script>
+<script>
+(function(){
+"use strict";
+var RAW = JSON.parse(document.getElementById('data').textContent);
+var ST = [
+  ["Federico Lacroze","Lacroze","lacroze"],
+  ["José Artigas","Artigas","artigas"],
+  ["Pedro N. Arata","Arata","arata"],
+  ["Dr. Francisco Beiró","Beiró","beiro"],
+  ["El Libertador","El Libertador","libertador"],
+  ["Antonio Devoto","Devoto","devoto"],
+  ["Coronel Francisco Lynch","Lynch","lynch"],
+  ["Fernández Moreno","F. Moreno","fmoreno"],
+  ["Lourdes","Lourdes","lourdes"],
+  ["Tropezón","Tropezón","tropezon"],
+  ["José María Bosch","Bosch","bosch"],
+  ["Martín Coronado","Coronado","coronado"],
+  ["Pablo Podestá","Podestá","podesta"],
+  ["Jorge Newbery","Newbery","newbery"],
+  ["Rubén Darío","Darío","dario"],
+  ["Ejército de los Andes","Ej. de los Andes","eandes"],
+  ["Juan B. de La Salle","De La Salle","delasalle"],
+  ["Sargento Barrufaldi","Barrufaldi","barrufaldi"],
+  ["Capitán Lozano","Lozano","lozano"],
+  ["Teniente Agneta","Agneta","agneta"],
+  ["Campo de Mayo","Campo de Mayo","campodemayo"],
+  ["Sargento Cabral","Sgto. Cabral","cabral"],
+  ["General Lemos","Lemos","lemos"]
+];
+var N = ST.length;
+var DAYNAME = {habil:"Hábil", sabado:"Sábado", domingo:"Domingo", feriado:"Feriado"};
+var DAYLONG = {habil:"día hábil", sabado:"sábado", domingo:"domingo", feriado:"feriado"};
+
+/* ---------- datos ---------- */
+function expand(day, dir){
+  var noFer = (RAW.flags.noFeriado[day] || {})[dir] || [];
+  return RAW[day][dir].map(function(s, k){
+    var p = s.split('|'), cur = +p[0], seq = [cur];
+    for (var i = 0; i < p[1].length; i++){ cur += +p[1][i]; seq.push(cur); }
+    var t = dir === 'L' ? seq : seq.slice().reverse(); // t[i] = minuto en la estación i (0 = Lacroze)
+    return {t:t, dir:dir, id:day+dir+k, noFer:noFer.indexOf(k) >= 0};
+  });
+}
+var SCHED = {};
+["habil","sabado","domingo"].forEach(function(d){ SCHED[d] = {L:expand(d,'L'), C:expand(d,'C')}; });
+function trainsFor(type, dir){
+  if (type === 'feriado') return SCHED.domingo[dir].filter(function(x){ return !x.noFer; });
+  return SCHED[type][dir];
+}
+
+/* ---------- fechas y feriados (hora de Buenos Aires) ---------- */
+var fmtBA = new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
+function nowBA(){
+  var o = {};
+  fmtBA.formatToParts(new Date()).forEach(function(p){ o[p.type] = p.value; });
+  var h = +o.hour % 24;
+  return {y:+o.year, m:+o.month, d:+o.day, min: h*60 + (+o.minute) + (+o.second)/60};
+}
+function ymd(y,m,d){ var dt = new Date(Date.UTC(y,m-1,d)); return {y:dt.getUTCFullYear(), m:dt.getUTCMonth()+1, d:dt.getUTCDate(), wd:dt.getUTCDay()}; }
+function addDays(date, n){ return ymd(date.y, date.m, date.d + n); }
+function key(date){ return date.y + '-' + date.m + '-' + date.d; }
+var ferCache = {};
+function feriados(y){
+  if (ferCache[y]) return ferCache[y];
+  var s = {};
+  function add(m,d){ var x = ymd(y,m,d); s[key(x)] = 1; }
+  [[1,1],[3,24],[4,2],[5,1],[5,25],[6,20],[7,9],[12,8],[12,25]].forEach(function(f){ add(f[0],f[1]); });
+  // Pascua (algoritmo gregoriano)
+  var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),
+      h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,mm=Math.floor((a+11*h+22*l)/451),
+      em=Math.floor((h+l-7*mm+114)/31), ed=((h+l-7*mm+114)%31)+1;
+  add(em, ed-48); add(em, ed-47); add(em, ed-2); // carnaval lunes y martes, viernes santo
+  // trasladables (Ley 27.399)
+  [[8,17],[10,12],[11,20]].forEach(function(f){
+    var x = ymd(y,f[0],f[1]), off = 0;
+    if (x.wd === 2) off = -1; else if (x.wd === 3) off = -2; else if (x.wd === 4) off = 4; else if (x.wd === 5) off = 3;
+    add(f[0], f[1]+off);
+  });
+  var gx = ymd(y,6,17), goff = gx.wd === 3 ? -2 : gx.wd === 4 ? 4 : gx.wd === 5 ? 3 : 0;
+  add(6, 17+goff);
+  ferCache[y] = s; return s;
+}
+function typeOf(date){
+  if (feriados(date.y)[key(date)]) return 'feriado';
+  if (date.wd === 0) return 'domingo';
+  if (date.wd === 6) return 'sabado';
+  return 'habil';
+}
+
+/* ---------- utilidades ---------- */
+function pad(n){ return (n < 10 ? '0' : '') + n; }
+function hhmm(m){ m = Math.round(m); m = ((m % 1440) + 1440) % 1440; return pad(Math.floor(m/60)) + ':' + pad(m % 60); }
+function untilTxt(diff){
+  if (diff < 0.5) return 'sale ahora';
+  var m = Math.round(diff);
+  if (m < 60) return 'en ' + m + ' min';
+  var h = Math.floor(m/60), r = m % 60;
+  return 'en ' + h + ' h' + (r ? ' ' + pad(r) : '');
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+var store = {
+  get:function(k, def){ try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch(e){ return def; } },
+  set:function(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+};
+
+/* ---------- estado ---------- */
+var S = {
+  from: 11, to: 0,
+  day: 'hoy',          // 'hoy' | habil | sabado | domingo | feriado
+  at: null,            // null = en vivo; si no, minuto elegido
+  showAll: false,
+  pick: null           // id de tren elegido a mano
+};
+var favs = store.get('urq.favs', [[11,0],[0,11]]);
+var last = store.get('urq.last', null);
+if (last && last.length === 2) { S.from = last[0]; S.to = last[1]; }
+readHash();
+
+function readHash(){
+  var h = (location.hash || '').replace(/^#/, '');
+  if (!h) return false;
+  var parts = h.split('-'), a = -1, b = -1;
+  for (var i = 0; i < N; i++){ if (ST[i][2] === parts[0]) a = i; if (ST[i][2] === parts[1]) b = i; }
+  if (a >= 0 && b >= 0 && a !== b){ S.from = a; S.to = b; return true; }
+  return false;
+}
+function writeHash(){
+  try { var h = '#' + ST[S.from][2] + '-' + ST[S.to][2]; if (location.hash !== h) location.replace(h); } catch(e){}
+}
+
+/* ---------- consulta ---------- */
+// Devuelve el "contexto": tipo de día, minuto de referencia y lista de viajes con dep/arr en minutos relativos al día elegido.
+function context(){
+  var n = nowBA(), today = ymd(n.y, n.m, n.d);
+  var ref = S.at === null ? n.min : S.at;
+  var auto = S.day === 'hoy';
+  var type = auto ? typeOf(today) : S.day;
+  return {now:n, today:today, ref:ref, auto:auto, type:type};
+}
+function trips(ctx, o, d){
+  var dir = o < d ? 'L' : 'C', out = [];
+  function push(list, off, tag){
+    list.forEach(function(tr){
+      var dep = tr.t[o] + off, arr = tr.t[d] + off;
+      out.push({tr:tr, off:off, dep:dep, arr:arr, dur:arr-dep, tag:tag});
+    });
+  }
+  push(trainsFor(ctx.type, dir), 0, null);
+  if (ctx.auto){
+    var yType = typeOf(addDays(ctx.today, -1));
+    push(trainsFor(yType, dir).filter(function(tr){ return tr.t[o] >= 1440; }), -1440, null);
+    var tType = typeOf(addDays(ctx.today, 1));
+    push(trainsFor(tType, dir), 1440, 'mañana');
+  }
+  out.forEach(function(x){ if (!x.tag && x.dep >= 1440) x.tag = 'mañana'; });
+  out.sort(function(a,b){ return a.dep - b.dep; });
+  return out;
+}
+// Posición (índice de estación fraccionario) de un tren al minuto m, o null si no está circulando
+function posAt(tr, off, m){
+  var t = tr.t, seq = [];
+  for (var i = 0; i < N; i++) seq.push(tr.dir === 'L' ? i : N-1-i);
+  var first = t[seq[0]] + off, lastT = t[seq[N-1]] + off;
+  if (m < first - 0.01 || m > lastT + 0.5) return null;
+  for (var k = 0; k < N-1; k++){
+    var a = t[seq[k]] + off, b = t[seq[k+1]] + off;
+    if (m <= b){
+      var f = b > a ? Math.max(0, (m - a) / (b - a)) : 0;
+      return {p: seq[k] + f * (seq[k+1] - seq[k]), k:k, f:f, seq:seq};
+    }
+  }
+  return {p: seq[N-1], k:N-1, f:0, seq:seq, done:true};
+}
+
+/* ---------- interfaz ---------- */
+var $ = function(id){ return document.getElementById(id); };
+function fillSelects(){
+  ['from','to'].forEach(function(id){
+    $(id).innerHTML = ST.map(function(s, i){ return '<option value="' + i + '">' + esc(s[0]) + '</option>'; }).join('');
+  });
+}
+function renderControls(ctx){
+  $('from').value = S.from; $('to').value = S.to;
+  var todayType = typeOf(ctx.today);
+  var days = [['hoy','Hoy · ' + DAYNAME[todayType]],['habil','Hábil'],['sabado','Sábado'],['domingo','Domingo'],['feriado','Feriado']];
+  $('days').innerHTML = days.map(function(d){
+    return '<button type="button" data-day="' + d[0] + '" aria-pressed="' + (S.day === d[0]) + '">' + esc(d[1]) + '</button>';
+  }).join('');
+  var isFav = favs.some(function(f){ return f[0] === S.from && f[1] === S.to; });
+  $('favs').innerHTML = favs.map(function(f, i){
+    var on = f[0] === S.from && f[1] === S.to;
+    return '<button type="button" class="chip" data-fav="' + i + '" aria-pressed="' + on + '">' + esc(ST[f[0]][1]) + ' → ' + esc(ST[f[1]][1]) + '</button>';
+  }).join('') + '<button type="button" class="chip ghost" id="favToggle">' + (isFav ? '✕ Quitar de guardados' : '☆ Guardar este viaje') + '</button>';
+  if (document.activeElement !== $('at')) $('at').value = hhmm(ctx.ref);
+  $('liveTag').hidden = S.at !== null;
+  $('nowBtn').hidden = S.at === null;
+}
+
+var lastBoardKey = '';
+function render(){
+  var ctx = context();
+  $('clock').textContent = hhmm(Math.floor(ctx.now.min));
+  renderControls(ctx);
+  var o = S.from, d = S.to;
+  var board = $('board');
+  if (o === d){
+    board.classList.add('empty');
+    $('bRoute').textContent = '';
+    $('bDep').textContent = '—';
+    $('bIn').innerHTML = 'Elegí dos estaciones distintas';
+    $('bFoot').innerHTML = '';
+    $('facts').innerHTML = ''; $('list').innerHTML = ''; $('diagram').innerHTML = ''; $('tripStatus').textContent = '';
+    $('moreBtn').hidden = true;
+    return;
+  }
+  $('moreBtn').hidden = false;
+  var all = trips(ctx, o, d);
+  var dayTrips = all.filter(function(x){ return x.off === 0; });
+  var upcoming = all.filter(function(x){ return x.dep >= ctx.ref - 0.25; });
+  if (!ctx.auto) upcoming = upcoming.filter(function(x){ return x.off === 0; });
+  var next = upcoming[0] || null;
+  var stops = Math.abs(d - o) - 1;
+  var routeTxt = ST[o][1] + ' → ' + ST[d][1];
+
+  /* tablero */
+  $('bRoute').textContent = routeTxt;
+  if (next){
+    board.classList.remove('empty');
+    var bk = next.tr.id + ':' + next.off;
+    var dep = $('bDep');
+    dep.textContent = hhmm(next.dep);
+    if (bk !== lastBoardKey){ dep.classList.remove('flip'); void dep.offsetWidth; dep.classList.add('flip'); lastBoardKey = bk; }
+    var diff = next.dep - ctx.ref;
+    $('bIn').innerHTML = esc(S.at === null ? untilTxt(diff) : 'el primero desde las ' + hhmm(ctx.ref)) +
+      (next.tag ? '<small>' + esc(next.tag) + '</small>' : '<small>de ' + esc(ST[o][0]) + '</small>');
+    $('bFoot').innerHTML = '<span>Llega <b class="tab">' + hhmm(next.arr) + '</b></span><span><b>' + next.dur + ' min</b> de viaje</span><span>' +
+      (stops === 0 ? 'sin paradas en el medio' : stops + (stops === 1 ? ' parada' : ' paradas') + ' en el medio') + '</span>';
+  } else {
+    board.classList.add('empty');
+    $('bDep').textContent = 'Sin trenes';
+    $('bIn').innerHTML = '<small>No hay más trenes ese ' + DAYLONG[ctx.type] + ' después de las ' + hhmm(ctx.ref) + '.</small>';
+    $('bFoot').innerHTML = dayTrips.length ? '<span>El primero sale a las <b class="tab">' + hhmm(dayTrips[0].dep) + '</b></span>' : '';
+  }
+
+  /* datos rápidos */
+  var durs = dayTrips.map(function(x){ return x.dur; });
+  var dmin = Math.min.apply(null, durs), dmax = Math.max.apply(null, durs);
+  var gaps = [];
+  for (var i = 1; i < Math.min(upcoming.length, 6); i++) gaps.push(Math.round(upcoming[i].dep - upcoming[i-1].dep));
+  var facts = '<div class="fact">Tarda <b>' + (dmin === dmax ? dmin : dmin + '–' + dmax) + ' min</b></div>';
+  var gmax0 = gaps.length ? Math.max.apply(null, gaps) : 999;
+  if (gaps.length >= 2 && gmax0 <= 60){
+    var gmin = Math.min.apply(null, gaps), gmax = gmax0;
+    facts += '<div class="fact">Pasa cada <b>' + (gmin === gmax ? gmin : gmin + '–' + gmax) + ' min</b> a esta hora</div>';
+  }
+  facts += '<div class="fact"><b>' + dayTrips.length + '</b> trenes por ' + DAYLONG[ctx.type] + '</div>';
+  $('facts').innerHTML = facts;
+
+  /* lista */
+  var list, showPast = false;
+  if (S.showAll){
+    list = dayTrips.slice(); showPast = true;
+    $('listTitle').textContent = 'Todos los trenes · ' + DAYNAME[ctx.type];
+    $('moreBtn').textContent = 'Ver solo los próximos';
+  } else {
+    list = upcoming.slice(0, 8);
+    $('listTitle').textContent = 'Siguientes trenes';
+    $('moreBtn').textContent = 'Ver todos los del día';
+  }
+  var sel = null;
+  if (S.pick){ sel = all.filter(function(x){ return x.tr.id + ':' + x.off === S.pick; })[0] || null; }
+  if (!sel) { sel = next; S.pick = null; }
+  var selKey = sel ? sel.tr.id + ':' + sel.off : '';
+  $('list').innerHTML = list.length ? list.map(function(x){
+    var k = x.tr.id + ':' + x.off, past = x.dep < ctx.ref - 0.25;
+    var inTxt = past ? 'ya salió' : (S.at === null ? untilTxt(x.dep - ctx.ref) : '');
+    return '<li><button type="button" class="trow' + (past && showPast ? ' past' : '') + '" data-k="' + k + '" aria-current="' + (k === selKey) + '">' +
+      '<span class="dep tab">' + hhmm(x.dep) + '</span><span class="ar">→</span><span class="arr tab">' + hhmm(x.arr) + '</span>' +
+      '<span class="dur">' + x.dur + ' min' + (x.tag ? '<span class="tag">' + esc(x.tag) + '</span>' : '') + '</span>' +
+      '<span class="in">' + esc(inTxt) + '</span></button></li>';
+  }).join('') : '<li class="msg">No hay trenes para mostrar.</li>';
+  if (S.showAll && !S._scrolled){
+    S._scrolled = true;
+    var cur = $('list').querySelector('.trow:not(.past)');
+    if (cur && cur.parentNode.previousElementSibling) cur.parentNode.previousElementSibling.scrollIntoView({block:'nearest'});
+  }
+
+  renderTrip(ctx, sel, o, d);
+}
+
+function renderTrip(ctx, sel, o, d){
+  var dir = o < d ? 'L' : 'C';
+  var order = []; for (var i = 0; i < N; i++) order.push(dir === 'L' ? i : N-1-i); // filas en sentido del viaje
+  var rowOf = function(st){ return dir === 'L' ? st : N-1-st; };
+  var lo = Math.min(rowOf(o), rowOf(d)), hi = Math.max(rowOf(o), rowOf(d));
+  if (!sel){
+    $('tripTitle').textContent = 'Recorrido';
+    $('tripStatus').textContent = 'Elegí un tren de la lista para ver su recorrido.';
+  } else {
+    $('tripTitle').textContent = 'Recorrido del tren de las ' + hhmm(sel.dep);
+  }
+  var html = '';
+  order.forEach(function(st, r){
+    var on = r >= lo && r <= hi, end = st === o || st === d;
+    var t = sel ? hhmm(sel.tr.t[st] + sel.off) : '';
+    var tag = st === o ? '<span class="tag">subís</span>' : st === d ? '<span class="tag">bajás</span>' : '';
+    html += '<div class="drow' + (on ? ' on' : '') + (end ? ' end' : '') + '"><span class="t tab">' + t + '</span><span class="dot"></span><span class="n">' + esc(ST[st][0]) + tag + '</span></div>';
+  });
+  var rh = $('diagram').querySelector('.drow') ? $('diagram').querySelector('.drow').getBoundingClientRect().height : 34;
+  rh = rh || 34;
+  var cy = function(row){ return 4 + row * rh + rh / 2; };
+  html += '<div class="rail" style="top:' + cy(0) + 'px;height:' + (cy(N-1) - cy(0)) + 'px"></div>';
+  html += '<div class="rail-on" style="top:' + cy(lo) + 'px;height:' + (cy(hi) - cy(lo)) + 'px"></div>';
+
+  // trenes circulando al minuto de referencia
+  var m = ctx.ref, railX = 58 + 30;
+  var dayLists = [{type:ctx.type, off:0}];
+  if (ctx.auto) dayLists.push({type:typeOf(addDays(ctx.today, -1)), off:-1440});
+  var selPos = null;
+  ['L','C'].forEach(function(tdir){
+    dayLists.forEach(function(dl){
+      trainsFor(dl.type, tdir).forEach(function(tr){
+        var p = posAt(tr, dl.off, m);
+        if (!p || p.done) return;
+        var row = dir === 'L' ? p.p : N-1-p.p;
+        var isSel = sel && tr.id === sel.tr.id && dl.off === sel.off;
+        if (isSel){ selPos = p; return; }
+        var same = tdir === dir;
+        html += '<span class="mk ' + (same ? 'same' : 'opp') + '" style="top:' + cy(row).toFixed(1) + 'px;left:' + (railX + (same ? 15 : -15)) + 'px"></span>';
+      });
+    });
+  });
+  if (selPos){
+    var srow = dir === 'L' ? selPos.p : N-1-selPos.p;
+    html += '<span class="mk me" style="top:' + cy(srow).toFixed(1) + 'px;left:' + railX + 'px"></span>';
+  }
+  $('diagram').innerHTML = html;
+
+  if (sel){
+    var when = S.at === null ? 'Ahora' : 'A las ' + hhmm(m);
+    var txt;
+    var startT = sel.tr.t[dir === 'L' ? 0 : N-1] + sel.off;
+    if (selPos){
+      var a = ST[selPos.seq[selPos.k]][1], b = selPos.seq[selPos.k+1] !== undefined ? ST[selPos.seq[selPos.k+1]][1] : a;
+      var where = selPos.f < 0.2 ? 'en ' + a : selPos.f > 0.8 ? 'llegando a ' + b : 'entre ' + a + ' y ' + b;
+      var curRow = dir === 'L' ? selPos.p : N-1-selPos.p;
+      if (curRow < rowOf(o) - 0.01) txt = when + ' está <b>' + esc(where) + '</b>. Llega a ' + esc(ST[o][1]) + ' ' + untilTxt(sel.dep - m).replace('sale ahora','ya mismo') + '.';
+      else if (curRow <= rowOf(d)) txt = when + ' está <b>' + esc(where) + '</b>, en tu viaje. Llega a ' + esc(ST[d][1]) + ' a las ' + hhmm(sel.arr) + '.';
+      else txt = 'Ya pasó por ' + esc(ST[d][1]) + '.';
+    } else if (m < startT && (o === 0 || o === N-1)){
+      txt = 'Sale de ' + esc(ST[o][0]) + ' a las <b>' + hhmm(sel.dep) + '</b> y llega a ' + esc(ST[d][1]) + ' a las ' + hhmm(sel.arr) + '.';
+    } else if (m < startT){
+      txt = 'Todavía no salió de ' + esc(ST[dir === 'L' ? 0 : N-1][0]) + ' (sale ' + hhmm(startT) + '). Pasa por ' + esc(ST[o][1]) + ' a las <b>' + hhmm(sel.dep) + '</b>.';
+    } else {
+      txt = 'Este tren ya terminó el recorrido.';
+    }
+    $('tripStatus').innerHTML = txt;
+  }
+}
+
+/* ---------- eventos ---------- */
+function changed(){ S.pick = null; S._scrolled = false; store.set('urq.last', [S.from, S.to]); writeHash(); render(); }
+$('from').addEventListener('change', function(){ S.from = +this.value; changed(); });
+$('to').addEventListener('change', function(){ S.to = +this.value; changed(); });
+$('swap').addEventListener('click', function(){ var t = S.from; S.from = S.to; S.to = t; changed(); });
+$('favs').addEventListener('click', function(e){
+  var b = e.target.closest('button'); if (!b) return;
+  if (b.id === 'favToggle'){
+    var i = favs.findIndex(function(f){ return f[0] === S.from && f[1] === S.to; });
+    if (i >= 0) favs.splice(i, 1); else if (S.from !== S.to) favs.push([S.from, S.to]);
+    store.set('urq.favs', favs); render(); return;
+  }
+  var f = favs[+b.getAttribute('data-fav')]; if (!f) return;
+  S.from = f[0]; S.to = f[1]; changed();
+});
+$('days').addEventListener('click', function(e){
+  var b = e.target.closest('button[data-day]'); if (!b) return;
+  S.day = b.getAttribute('data-day'); S.pick = null; S._scrolled = false; render();
+});
+$('at').addEventListener('change', function(){
+  var v = this.value; if (!v) return;
+  var p = v.split(':'); S.at = (+p[0]) * 60 + (+p[1]); S.pick = null; S._scrolled = false; render();
+});
+$('nowBtn').addEventListener('click', function(){ S.at = null; S.pick = null; render(); });
+$('moreBtn').addEventListener('click', function(){ S.showAll = !S.showAll; S._scrolled = false; render(); });
+$('list').addEventListener('click', function(e){
+  var b = e.target.closest('.trow'); if (!b) return;
+  S.pick = b.getAttribute('data-k'); render();
+  if (window.matchMedia('(max-width: 899px)').matches){ try { $('tripTitle').scrollIntoView({behavior:'smooth', block:'start'}); } catch(err){} }
+});
+window.addEventListener('hashchange', function(){ if (readHash()){ S.pick = null; render(); } });
+window.addEventListener('resize', function(){ render(); });
+
+fillSelects();
+writeHash();
+render();
+render(); // segunda pasada para medir la altura real de las filas
+setInterval(function(){ if (S.at === null) render(); else $('clock').textContent = hhmm(Math.floor(nowBA().min)); }, 15000);
+})();
+</script>
+</body>
+</html>
