@@ -1,4 +1,4 @@
-# Tren Urquiza: horarios
+# Tren Urquiza horarios
 
 Página para ver los próximos trenes de la línea Urquiza (Federico Lacroze ↔ General Lemos): cuándo sale, a qué hora llega, cuánto tarda y por dónde va según el horario.
 
