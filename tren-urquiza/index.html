@@ -2,115 +2,146 @@
 <html lang="es-AR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tren Urquiza horarios</title>
+<meta name="description" content="Próximo tren Urquiza al instante: cuándo sale, cuánto tarda y por dónde va, entre Federico Lacroze y General Lemos. Horarios de invierno 2026 para días hábiles, sábados, domingos y feriados.">
+<meta name="theme-color" content="#0a8577">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta property="og:title" content="Tren Urquiza horarios">
+<meta property="og:description" content="Mirá cuándo pasa el próximo tren y cuánto tarda, de Lacroze a Lemos.">
 <meta property="og:type" content="website">
+<meta property="og:image" content="https://agustinjjesus.github.io/king-muebles-pruebas/tren-urquiza/og.png">
+<meta property="og:url" content="https://agustinjjesus.github.io/king-muebles-pruebas/tren-urquiza/">
+<meta name="twitter:card" content="summary_large_image">
+<!--
+  ANUNCIOS: cuando Google AdSense apruebe el sitio, completar ADS_CLIENT y los ADS_SLOTS
+  más abajo (en el script, buscar "ANUNCIOS"). No hace falta tocar nada más.
+-->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Doto:wght@700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Doto:wght@800;900&display=swap">
 <style>
-/* Plan: una columna en el celular; en pantallas anchas, controles + tablero + lista a la izquierda y el recorrido a la derecha.
-   El tablero del andén (LED ámbar sobre negro) es el único elemento llamativo; todo lo demás es tranquilo y muy legible. */
+/* Plan: una columna en el celular (elegir viaje → próximo tren → lista → recorrido → info);
+   en pantallas anchas, el viaje y los trenes a la izquierda y el recorrido a la derecha.
+   El tablero ámbar del andén es lo único llamativo; el resto es tranquilo y muy legible. */
 :root{
-  --bg:#edf1ef;
+  --bg:#eef2f0;
   --surface:#ffffff;
-  --ink:#14211e;
-  --muted:#5a6b67;
-  --rule:#d3dcd9;
+  --ink:#13201d;
+  --muted:#596a66;
+  --rule:#d4ddda;
   --line:#0a8577;
-  --line-soft:#d6ebe7;
+  --line-soft:#dcefeb;
   --led:#ffb21c;
   --board:#0c1211;
-  --board-ink:#c9d4d1;
+  --board-ink:#c4d0cd;
   --font-body:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-led:"Doto", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  --rowh:34px;
+  --rowh:36px;
+  --radius:16px;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#0d1312; --surface:#151f1d; --ink:#e5edeb; --muted:#93a6a1; --rule:#26342f;
-    --line:#2fc2b0; --line-soft:#173a35; --board:#050807; --board-ink:#aebcb8;
+    --bg:#0c1211; --surface:#141e1c; --ink:#e6eeec; --muted:#93a5a1; --rule:#25332f;
+    --line:#2fc2b0; --line-soft:#15332f; --board:#050807; --board-ink:#aebcb8;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0d1312; --surface:#151f1d; --ink:#e5edeb; --muted:#93a6a1; --rule:#26342f;
-  --line:#2fc2b0; --line-soft:#173a35; --board:#050807; --board-ink:#aebcb8;
+  --bg:#0c1211; --surface:#141e1c; --ink:#e6eeec; --muted:#93a5a1; --rule:#25332f;
+  --line:#2fc2b0; --line-soft:#15332f; --board:#050807; --board-ink:#aebcb8;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:17px;line-height:1.45;-webkit-text-size-adjust:100%}
-button,select,input{font:inherit;color:inherit}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:17px;line-height:1.45;-webkit-text-size-adjust:100%;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--line)}
 :focus-visible{outline:3px solid var(--led);outline-offset:2px}
-h1,h2{text-wrap:balance;margin:0}
+h1,h2,h3{text-wrap:balance;margin:0}
 .tab{font-variant-numeric:tabular-nums}
+[hidden]{display:none !important}
 
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px 10px;max-width:1120px;margin:0 auto}
-.brand{display:flex;align-items:center;gap:10px}
-.brand h1{font-size:21px;letter-spacing:.01em}
-.brand .sub{display:block;font-size:13px;color:var(--muted);font-weight:400}
-.roundel{width:30px;height:30px;border-radius:50%;border:5px solid var(--line);position:relative;flex:none}
+/* barra superior */
+.top{max-width:1120px;margin:0 auto;padding:12px 16px 8px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit}
+.brand h1{font-size:clamp(17px,4.8vw,21px);line-height:1.1;white-space:nowrap}
+.roundel{width:28px;height:28px;border-radius:50%;border:5px solid var(--line);position:relative;flex:none}
 .roundel::after{content:"";position:absolute;left:-7px;right:-7px;top:50%;height:6px;margin-top:-3px;background:var(--line);border-radius:2px}
-.clock{font-family:var(--font-led);font-weight:900;font-size:26px;color:var(--ink);letter-spacing:.04em}
+.iconbtn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--rule);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:700;font-size:15px}
+.iconbtn svg{width:18px;height:18px}
 
-.wrap{max-width:1120px;margin:0 auto;padding:0 16px 40px;display:grid;gap:16px}
-@media (min-width:900px){
-  .wrap{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);align-items:start}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px 32px;display:grid;gap:14px}
+.col-a,.col-b{display:grid;gap:14px;min-width:0;align-content:start}
+@media (min-width:960px){
+  .wrap{grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);align-items:start;column-gap:20px}
   .col-b{position:sticky;top:12px}
+  .info,.ad-final,.foot{grid-column:1 / -1}
 }
-.col-a,.col-b{display:grid;gap:16px;min-width:0}
-.card{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:14px}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);padding:14px}
 
-/* Controles */
-.route{display:grid;grid-template-columns:1fr auto;gap:8px 10px;align-items:end}
-.field{display:grid;gap:4px}
-.field label{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-select{appearance:none;-webkit-appearance:none;width:100%;padding:11px 36px 11px 12px;border-radius:10px;border:1px solid var(--rule);background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23889a96' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 12px center;font-weight:700;font-size:18px}
-.swap{grid-row:1 / span 2;grid-column:2;align-self:center;width:48px;height:48px;border-radius:50%;border:1px solid var(--rule);background:var(--bg);cursor:pointer;font-size:22px;line-height:1}
+/* elegir viaje */
+.route{position:relative;display:grid;gap:8px}
+.pick{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:4px 12px;width:100%;text-align:left;border:1px solid var(--rule);background:var(--bg);border-radius:12px;padding:10px 64px 10px 14px;min-height:62px}
+.pick:hover{border-color:var(--line)}
+.pick .lab{grid-column:2;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pick .st{grid-column:2;font-size:20px;font-weight:700;line-height:1.15}
+.pick .pin{grid-row:1 / span 2;width:14px;height:14px;border-radius:50%;border:4px solid var(--line);background:var(--surface)}
+.pick.to .pin{background:var(--line)}
+.route::before{content:"";position:absolute;left:21px;top:42px;bottom:42px;width:4px;background:var(--line);border-radius:2px;opacity:.35}
+.swap{position:absolute;right:12px;top:50%;margin-top:-23px;width:46px;height:46px;border-radius:50%;border:1px solid var(--rule);background:var(--surface);font-size:21px;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .swap:hover{border-color:var(--line)}
-.favs{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.chip{border:1px solid var(--rule);background:var(--bg);border-radius:999px;padding:7px 12px;font-size:15px;cursor:pointer;white-space:nowrap}
-.chip[aria-pressed="true"]{background:var(--line);border-color:var(--line);color:#fff}
-.chip.ghost{background:transparent;border-style:dashed;color:var(--muted)}
-.when{display:grid;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--rule)}
+.recents{display:flex;gap:8px;overflow-x:auto;padding:12px 2px 2px;scrollbar-width:none}
+.recents::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--rule);background:var(--surface);border-radius:999px;padding:7px 13px;font-size:15px;white-space:nowrap}
+.chip:hover{border-color:var(--line)}
+.recents .lbl{flex:none;align-self:center;font-size:13px;color:var(--muted);padding-right:2px}
+
+.when{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--rule);font-size:15px}
+.when-txt{display:inline-flex;align-items:center;gap:8px;color:var(--muted)}
+.when-txt b{color:var(--ink)}
+.dotlive{width:9px;height:9px;border-radius:50%;background:var(--line);box-shadow:0 0 0 3px var(--line-soft)}
+.linkbtn{border:0;background:none;color:var(--line);font-weight:700;padding:4px 2px;text-decoration:underline;text-underline-offset:3px}
+.when-panel{display:grid;gap:10px;margin-top:12px}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
-.seg button{border:1px solid var(--rule);background:var(--bg);border-radius:8px;padding:7px 11px;font-size:15px;cursor:pointer}
+.seg button{border:1px solid var(--rule);background:var(--bg);border-radius:9px;padding:8px 12px;font-size:15px}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.time{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.time label{font-size:15px;color:var(--muted)}
-.time input{padding:7px 10px;border-radius:8px;border:1px solid var(--rule);background:var(--bg);font-weight:700}
-.time .now{border:0;background:none;color:var(--line);font-weight:700;cursor:pointer;padding:6px 4px;text-decoration:underline;text-underline-offset:3px}
-.live{font-size:14px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
-.live i{width:8px;height:8px;border-radius:50%;background:var(--line);display:inline-block}
+.timerow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.timerow label{color:var(--muted);font-size:15px}
+.timerow input{padding:8px 10px;border-radius:9px;border:1px solid var(--rule);background:var(--bg);font-weight:700}
 
-/* Tablero */
-.board{background:var(--board);color:var(--board-ink);border-radius:16px;padding:16px 18px 18px;position:relative;overflow:hidden;
+/* tablero */
+.board{background:var(--board);color:var(--board-ink);border-radius:var(--radius);padding:16px 18px;
   background-image:radial-gradient(rgba(255,255,255,.045) 1px, transparent 1.2px);background-size:6px 6px}
-.board-head{display:flex;justify-content:space-between;gap:12px;font-size:13px;text-transform:uppercase;letter-spacing:.09em;font-weight:700}
-.board-head .r{color:#fff;text-transform:none;letter-spacing:0;font-size:15px;text-align:right}
-.board-main{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin:6px 0 4px}
-.led{font-family:var(--font-led);font-weight:900;color:var(--led);font-size:clamp(64px,19vw,96px);line-height:1;letter-spacing:.02em;text-shadow:0 0 18px rgba(255,178,28,.35)}
-.cd{font-size:22px;font-weight:700;color:#fff}
-.cd small{display:block;font-size:14px;font-weight:400;color:var(--board-ink)}
-.board-foot{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:16px}
-.board-foot b{color:#fff}
-.board.empty .led{font-size:clamp(40px,10vw,56px)}
+.eyebrow{display:flex;justify-content:space-between;gap:10px;font-size:13px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.eyebrow .r{color:#fff;letter-spacing:.02em;text-transform:none;font-size:15px;text-align:right}
+.big{display:flex;align-items:baseline;gap:10px;margin:8px 0 2px;font-family:var(--font-led);font-weight:900;color:var(--led);line-height:.95;text-shadow:0 0 18px rgba(255,178,28,.35)}
+.big .n{font-size:clamp(78px,24vw,112px)}
+.big .u{font-size:clamp(30px,8vw,40px)}
+.big.word .n{font-size:clamp(56px,16vw,80px)}
+.hero-line{font-size:18px;color:#fff;margin-top:4px}
+.hero-line b{color:var(--led)}
+.hero-line .sep{color:var(--board-ink);padding:0 4px}
+.after{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px dashed rgba(255,255,255,.18);font-size:15px}
+.after .k{text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:700}
+.after .t{background:rgba(255,255,255,.07);border-radius:8px;padding:5px 10px;color:#fff;font-weight:700}
+.after .t small{font-weight:400;color:var(--board-ink);margin-left:4px}
+.note{font-size:13px;color:var(--board-ink);margin-top:10px}
 .flip{animation:flip .45s ease-out}
-@keyframes flip{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+@keyframes flip{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 
-.facts{display:flex;flex-wrap:wrap;gap:8px}
-.fact{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:8px 12px;font-size:15px}
-.fact b{font-size:18px}
-
-/* Lista */
-.list-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px}
-h2{font-size:15px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-ol.trains{list-style:none;margin:0;padding:0;display:grid}
-.trow{width:100%;display:grid;grid-template-columns:auto auto auto 1fr auto;align-items:baseline;gap:10px;padding:11px 8px;border:0;border-top:1px solid var(--rule);background:transparent;text-align:left;cursor:pointer;border-radius:0}
+/* lista */
+.head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
+h2{font-size:14px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.facts{font-size:14px;color:var(--muted);text-align:right}
+ol.trains{list-style:none;margin:0;padding:0}
+.trow{width:100%;display:grid;grid-template-columns:auto auto auto 1fr auto;align-items:baseline;gap:10px;padding:12px 8px;border:0;border-top:1px solid var(--rule);background:transparent;text-align:left}
 ol.trains li:first-child .trow{border-top:0}
 .trow:hover{background:var(--bg)}
 .trow[aria-current="true"]{background:var(--line-soft);box-shadow:inset 4px 0 0 var(--line)}
@@ -121,44 +152,87 @@ ol.trains li:first-child .trow{border-top:0}
 .trow .in{font-weight:700;font-size:15px;color:var(--line);text-align:right;white-space:nowrap}
 .trow.past{opacity:.45}
 .trow.past .in{color:var(--muted);font-weight:400}
-.tag{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border:1px solid var(--rule);border-radius:5px;padding:1px 5px;color:var(--muted);margin-left:4px;vertical-align:2px}
-.more{margin-top:10px;width:100%;padding:11px;border-radius:10px;border:1px solid var(--rule);background:var(--bg);font-weight:700;cursor:pointer}
+.tag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border:1px solid var(--rule);border-radius:5px;padding:1px 5px;color:var(--muted);margin-left:6px;vertical-align:2px}
+.more{margin-top:8px;width:100%;padding:12px;border-radius:11px;border:1px solid var(--rule);background:var(--bg);font-weight:700}
 .msg{padding:12px 4px;color:var(--muted)}
 
-/* Recorrido */
-.trip-status{margin:4px 0 12px;font-size:16px}
+/* recorrido */
+.trip-status{margin:6px 0 10px;font-size:16px}
 .trip-status b{color:var(--line)}
 .diagram{position:relative;padding:4px 0}
-.drow{display:grid;grid-template-columns:58px 60px 1fr;align-items:center;height:var(--rowh)}
+.drow{display:grid;grid-template-columns:56px 60px 1fr;align-items:center;height:var(--rowh)}
 .drow .t{text-align:right;color:var(--muted);font-size:15px}
 .drow .n{font-size:15px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .drow.on .t,.drow.on .n{color:var(--ink)}
-.drow.end .n{font-weight:700;font-size:16px}
-.drow.end .t{font-weight:700;color:var(--ink);font-size:16px}
+.drow.end .n,.drow.end .t{font-weight:700;font-size:16px;color:var(--ink)}
 .drow .n .tag{border-color:var(--line);color:var(--line)}
 .dot{justify-self:center;width:12px;height:12px;border-radius:50%;background:var(--surface);border:3px solid var(--rule);position:relative;z-index:2}
 .drow.on .dot{border-color:var(--line)}
 .drow.end .dot{width:18px;height:18px;border-width:4px;background:var(--line)}
-.rail,.rail-on{position:absolute;left:calc(58px + 30px - 2px);width:4px;border-radius:2px;z-index:1}
+.rail,.rail-on{position:absolute;left:84px;width:4px;margin-left:-2px;border-radius:2px;z-index:1}
 .rail{background:var(--rule)}
-.rail-on{background:var(--line);width:6px;margin-left:-1px}
+.rail-on{background:var(--line);width:6px;margin-left:-3px}
 .mk{position:absolute;z-index:3;transform:translate(-50%,-50%);pointer-events:none;transition:top .8s linear}
-.mk.me{width:26px;height:26px;border-radius:50%;background:var(--led);border:3px solid var(--board);box-shadow:0 0 0 3px var(--led)}
+.mk.me{width:24px;height:24px;border-radius:50%;background:var(--led);border:3px solid var(--board);box-shadow:0 0 0 3px var(--led)}
 .mk.me::after{content:"";position:absolute;inset:-9px;border-radius:50%;border:2px solid var(--led);animation:pulse 1.8s ease-out infinite}
 @keyframes pulse{from{opacity:.9;transform:scale(.6)}to{opacity:0;transform:scale(1.35)}}
 .mk.same,.mk.opp{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent}
 .mk.same{border-top:11px solid var(--ink)}
 .mk.opp{border-bottom:11px solid var(--muted)}
-.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted);margin-top:10px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin-top:8px}
 .legend span{display:inline-flex;align-items:center;gap:6px}
-.lg-me{width:12px;height:12px;border-radius:50%;background:var(--led);display:inline-block}
+.lg-me{width:11px;height:11px;border-radius:50%;background:var(--led);display:inline-block}
 .lg-same{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid var(--ink);display:inline-block}
 .lg-opp{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:9px solid var(--muted);display:inline-block}
 
-footer{font-size:14px;color:var(--muted);max-width:65ch}
-footer p{margin:0 0 8px}
-footer a{color:var(--line);font-weight:700}
-@media (min-width:900px){footer{grid-column:1 / -1}}
+/* anuncios */
+.ad{display:block;min-height:100px;text-align:center}
+.ad-label{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.ad-ph{display:grid;place-items:center;min-height:110px;border:2px dashed var(--rule);border-radius:12px;color:var(--muted);font-size:15px;background:var(--surface)}
+
+/* info (texto para buscadores y para leer) */
+.info{display:grid;gap:14px}
+@media (min-width:760px){.info{grid-template-columns:repeat(2,minmax(0,1fr))}.info .wide{grid-column:1 / -1}}
+.info h2{margin-bottom:8px}
+.info h3{font-size:17px;margin:12px 0 4px}
+.info p{margin:6px 0;max-width:68ch}
+.lead{font-size:18px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td.tab,td.num{white-space:nowrap}
+@media (max-width:420px){.iconbtn .txt{display:none}.iconbtn{padding:9px}}
+.tblwrap{overflow-x:auto}
+.stlist{columns:2;column-gap:20px;padding-left:18px;margin:6px 0}
+@media (min-width:760px){.stlist{columns:3}}
+.stlist li{padding:2px 0;break-inside:avoid}
+
+.foot{font-size:14px;color:var(--muted);display:grid;gap:6px;padding-top:6px}
+.foot nav{display:flex;flex-wrap:wrap;gap:6px 18px}
+
+/* hoja de estaciones */
+dialog.sheet{border:0;padding:0;margin:auto auto 0;width:100%;max-width:520px;max-height:88vh;border-radius:18px 18px 0 0;background:var(--surface);color:var(--ink);box-shadow:0 -10px 40px rgba(0,0,0,.25)}
+@media (min-width:640px){dialog.sheet{margin:auto;border-radius:18px;max-height:80vh}}
+dialog.sheet::backdrop{background:rgba(5,10,9,.55)}
+.sheet-in{display:flex;flex-direction:column;max-height:inherit}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px 8px}
+.sheet-head h3{font-size:19px}
+.close{border:0;background:var(--bg);width:38px;height:38px;border-radius:50%;font-size:20px;line-height:1}
+.search{margin:0 16px 8px;padding:12px 14px;border-radius:12px;border:1px solid var(--rule);background:var(--bg);font-size:17px}
+.stations{list-style:none;margin:0;padding:4px 0 16px;overflow-y:auto;position:relative}
+.stations li{position:relative}
+.stations button{width:100%;display:flex;align-items:center;gap:14px;border:0;background:none;text-align:left;padding:11px 18px;font-size:17px}
+.stations button:hover{background:var(--bg)}
+.stations .sdot{width:13px;height:13px;border-radius:50%;border:3px solid var(--line);background:var(--surface);flex:none;position:relative;z-index:1}
+.stations li:not(:last-child)::after{content:"";position:absolute;left:24px;top:50%;height:100%;width:3px;background:var(--line);opacity:.3}
+.stations .cur{font-weight:700}
+.stations .cur .sdot{background:var(--line)}
+.stations .mini{margin-left:auto;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--line)}
+.stations.filtering li::after{display:none}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:15px;z-index:50;max-width:90vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
 @media (prefers-reduced-motion: reduce){
   .flip,.mk.me::after{animation:none}
   .mk{transition:none}
@@ -167,46 +241,54 @@ footer a{color:var(--line);font-weight:700}
 </head>
 <body>
 <header class="top">
-  <div class="brand">
+  <a class="brand" href="./" aria-label="Tren Urquiza horarios, inicio">
     <span class="roundel" aria-hidden="true"></span>
     <h1>Tren Urquiza horarios</h1>
-  </div>
-  <div class="clock tab" id="clock" aria-label="Hora actual">--:--</div>
+  </a>
+  <button class="iconbtn" id="shareBtn" type="button" aria-label="Compartir este viaje">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+    <span class="txt">Compartir</span>
+  </button>
 </header>
 
 <main class="wrap">
   <div class="col-a">
     <section class="card" aria-label="Elegir viaje">
       <div class="route">
-        <div class="field"><label for="from">Desde</label><select id="from"></select></div>
+        <button class="pick from" id="pickFrom" type="button"><span class="pin" aria-hidden="true"></span><span class="lab">Desde</span><span class="st" id="fromName">—</span></button>
+        <button class="pick to" id="pickTo" type="button"><span class="pin" aria-hidden="true"></span><span class="lab">Hasta</span><span class="st" id="toName">—</span></button>
         <button class="swap" id="swap" type="button" aria-label="Invertir el viaje" title="Invertir">⇅</button>
-        <div class="field"><label for="to">Hasta</label><select id="to"></select></div>
       </div>
-      <div class="favs" id="favs"></div>
+      <div class="recents" id="recents" hidden></div>
       <div class="when">
+        <span class="when-txt" id="whenTxt"></span>
+        <button class="linkbtn" id="whenBtn" type="button" aria-expanded="false" aria-controls="whenPanel">Cambiar día u hora</button>
+      </div>
+      <div class="when-panel" id="whenPanel" hidden>
         <div class="seg" id="days" role="group" aria-label="Qué horario usar"></div>
-        <div class="time">
+        <div class="timerow">
           <label for="at">Salgo a las</label>
           <input type="time" id="at" class="tab">
-          <span id="liveTag" class="live"><i></i>en vivo</span>
-          <button type="button" class="now" id="nowBtn" hidden>Volver a ahora</button>
+          <button type="button" class="linkbtn" id="nowBtn">Volver a ahora</button>
         </div>
       </div>
     </section>
 
     <section class="board" id="board" aria-live="polite">
-      <div class="board-head"><span>Próximo tren</span><span class="r" id="bRoute"></span></div>
-      <div class="board-main"><div class="led tab" id="bDep">--:--</div><div class="cd" id="bIn"></div></div>
-      <div class="board-foot" id="bFoot"></div>
+      <div class="eyebrow"><span id="bKicker">Próximo tren</span><span class="r" id="bRoute"></span></div>
+      <div class="big" id="bBig"><span class="n tab" id="bNum">--</span><span class="u" id="bUnit"></span></div>
+      <div class="hero-line" id="bLine"></div>
+      <div class="after" id="bAfter"></div>
+      <div class="note">El horario oficial puede variar ±3 minutos.</div>
     </section>
 
-    <div class="facts" id="facts"></div>
-
     <section class="card">
-      <div class="list-head"><h2 id="listTitle">Siguientes trenes</h2></div>
+      <div class="head"><h2 id="listTitle">Siguientes trenes</h2><span class="facts" id="facts"></span></div>
       <ol class="trains" id="list"></ol>
       <button class="more" id="moreBtn" type="button">Ver todos los del día</button>
     </section>
+
+    <aside class="ad ad-medio" data-slot="medio" hidden></aside>
   </div>
 
   <div class="col-b">
@@ -216,48 +298,120 @@ footer a{color:var(--line);font-weight:700}
       <div class="diagram" id="diagram"></div>
       <div class="legend">
         <span><i class="lg-me"></i>tu tren</span>
-        <span><i class="lg-same"></i>otros trenes, mismo sentido</span>
+        <span><i class="lg-same"></i>otros, mismo sentido</span>
         <span><i class="lg-opp"></i>sentido contrario</span>
       </div>
+      <button class="more" id="lineBtn" type="button">Ver toda la línea</button>
     </section>
   </div>
 
-  <footer>
-    <p>Horarios del cuadro oficial «Invierno 2026» de la línea Urquiza, vigente desde el 2 de marzo de 2026. Metrovías avisa que pueden variar ±3 minutos: conviene llegar un rato antes.</p>
-    <p>¿Demoras o servicio cortado? Mirá el estado en vivo en <a href="https://x.com/Metrovias">x.com/Metrovias</a>.</p>
-    <p>La posición de los trenes en el recorrido es la que marca el horario, no un GPS. Los feriados nacionales se detectan solos; si hoy es feriado y no aparece así, tocá «Feriado».</p>
+  <section class="info" id="info" aria-labelledby="infoTitle">
+    <div class="card wide">
+      <h2 id="infoTitle">Horarios del Tren Urquiza</h2>
+      <p class="lead">El Tren Urquiza une Federico Lacroze (CABA) con General Lemos (San Miguel) en 47 a 51 minutos, pasando por 23 estaciones. Arriba elegís de dónde salís y a dónde vas, y te muestra cuándo pasa el próximo tren, a qué hora llegás y por dónde va.</p>
+      <p>Los horarios son los del cuadro oficial «Invierno 2026» publicado por Metrovías, vigente desde el 2 de marzo de 2026: 185 trenes por día hábil, 128 los sábados y 77 los domingos y feriados, sumando los dos sentidos.</p>
+    </div>
+    <div class="card">
+      <h2>Primer y último tren</h2>
+      <div class="tblwrap"><table><thead><tr><th></th><th>Hábiles</th><th>Sábados</th><th>Domingos y feriados</th></tr></thead><tbody>
+        <tr><td><b>Desde Federico Lacroze</b></td><td class="tab">01:00 – 23:50</td><td class="tab">01:00 – 23:50</td><td class="tab">01:00 – 23:50</td></tr>
+        <tr><td><b>Desde General Lemos</b></td><td class="tab">01:00 – 23:59</td><td class="tab">01:00 – 23:48</td><td class="tab">00:01 – 23:35</td></tr>
+      </tbody></table></div>
+      <h2 style="margin-top:18px">Cada cuánto pasa</h2>
+      <div class="tblwrap"><table><thead><tr><th>Franja</th><th>Hábiles</th><th>Sábados</th><th>Domingos y feriados</th></tr></thead><tbody>
+        <tr><td>Madrugada (salidas antes de las 5)</td><td>01:00, 02:40, 03:35, 04:20, 04:35</td><td>01:00, 02:40, 03:35, 04:40</td><td>01:00, 04:25</td></tr>
+        <tr><td>Mañana (5 a 9)</td><td>cada 8–10 min</td><td>cada 15 min</td><td>cada 30 min</td></tr>
+        <tr><td>Mediodía (9 a 17)</td><td>cada 15 min</td><td>cada 15–20 min</td><td>cada 30 min</td></tr>
+        <tr><td>Tarde (17 a 20)</td><td>cada 10 min</td><td>cada 20 min</td><td>cada 30 min</td></tr>
+        <tr><td>Noche (20 a 24)</td><td>cada 15–20 min</td><td>cada 25–30 min</td><td>cada 30–48 min</td></tr>
+      </tbody></table></div>
+      <p style="font-size:14px;color:var(--muted)">Según las salidas desde Federico Lacroze.</p>
+    </div>
+    <div class="card">
+      <h2>Cuánto tarda hasta cada estación</h2>
+      <p style="font-size:14px;color:var(--muted)">Minutos de viaje un día hábil. Tocá una estación para ver sus próximos trenes.</p>
+      <div class="tblwrap"><table><thead><tr><th>Estación</th><th class="num">Desde Lacroze</th><th class="num">Desde Lemos</th></tr></thead><tbody>
+        <tr><td><a href="#lacroze-lemos">Federico Lacroze</a></td><td class="num">0 min</td><td class="num">50 min</td></tr>
+        <tr><td><a href="#artigas-lacroze">José Artigas</a></td><td class="num">3 min</td><td class="num">45 min</td></tr>
+        <tr><td><a href="#arata-lacroze">Pedro N. Arata</a></td><td class="num">5 min</td><td class="num">43 min</td></tr>
+        <tr><td><a href="#beiro-lacroze">Dr. Francisco Beiró</a></td><td class="num">7 min</td><td class="num">40 min</td></tr>
+        <tr><td><a href="#libertador-lacroze">El Libertador</a></td><td class="num">9 min</td><td class="num">39 min</td></tr>
+        <tr><td><a href="#devoto-lacroze">Antonio Devoto</a></td><td class="num">11 min</td><td class="num">38 min</td></tr>
+        <tr><td><a href="#lynch-lacroze">Coronel Francisco Lynch</a></td><td class="num">13 min</td><td class="num">36 min</td></tr>
+        <tr><td><a href="#fmoreno-lacroze">Fernández Moreno</a></td><td class="num">15 min</td><td class="num">34 min</td></tr>
+        <tr><td><a href="#lourdes-lacroze">Lourdes</a></td><td class="num">17 min</td><td class="num">32 min</td></tr>
+        <tr><td><a href="#tropezon-lacroze">Tropezón</a></td><td class="num">19 min</td><td class="num">30 min</td></tr>
+        <tr><td><a href="#bosch-lacroze">José María Bosch</a></td><td class="num">21 min</td><td class="num">28 min</td></tr>
+        <tr><td><a href="#coronado-lacroze">Martín Coronado</a></td><td class="num">24 min</td><td class="num">25 min</td></tr>
+        <tr><td><a href="#podesta-lacroze">Pablo Podestá</a></td><td class="num">26 min</td><td class="num">22 min</td></tr>
+        <tr><td><a href="#newbery-lacroze">Jorge Newbery</a></td><td class="num">28 min</td><td class="num">20 min</td></tr>
+        <tr><td><a href="#dario-lacroze">Rubén Darío</a></td><td class="num">29 min</td><td class="num">18 min</td></tr>
+        <tr><td><a href="#eandes-lacroze">Ejército de los Andes</a></td><td class="num">33 min</td><td class="num">14 min</td></tr>
+        <tr><td><a href="#delasalle-lacroze">Juan B. de La Salle</a></td><td class="num">34 min</td><td class="num">12 min</td></tr>
+        <tr><td><a href="#barrufaldi-lacroze">Sargento Barrufaldi</a></td><td class="num">36 min</td><td class="num">9 min</td></tr>
+        <tr><td><a href="#lozano-lacroze">Capitán Lozano</a></td><td class="num">38 min</td><td class="num">7 min</td></tr>
+        <tr><td><a href="#agneta-lacroze">Teniente Agneta</a></td><td class="num">40 min</td><td class="num">5 min</td></tr>
+        <tr><td><a href="#campodemayo-lacroze">Campo de Mayo</a></td><td class="num">42 min</td><td class="num">4 min</td></tr>
+        <tr><td><a href="#cabral-lacroze">Sargento Cabral</a></td><td class="num">44 min</td><td class="num">2 min</td></tr>
+        <tr><td><a href="#lemos-lacroze">General Lemos</a></td><td class="num">47 min</td><td class="num">0 min</td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="card wide">
+      <h2>Preguntas frecuentes</h2>
+      <h3>¿Cuánto tarda el tren de Lacroze a Lemos?</h3><p>Entre 47 y 51 minutos de punta a punta, según el tren.</p>
+      <h3>¿Hasta qué hora hay trenes?</h3><p>El último sale de Federico Lacroze a las 23:50 todos los días. De General Lemos sale a las 23:59 los días hábiles, a las 23:48 los sábados y a las 23:35 los domingos y feriados.</p>
+      <h3>¿Hay trenes los feriados?</h3><p>Sí, con el horario de domingos y feriados. La página detecta sola los feriados nacionales. El tren de las 00:01 que sale de General Lemos no corre los feriados.</p>
+      <h3>¿Los horarios son exactos?</h3><p>Metrovías aclara que pueden variar ±3 minutos, así que conviene llegar un rato antes. Si hay demoras o el servicio está cortado, lo avisan en su cuenta de X.</p>
+      <h3>¿Dónde está el tren ahora?</h3><p>En «Recorrido» ves por qué estación debería ir cada tren según el horario. No es un GPS: si hay demoras, el tren real puede estar más atrás.</p>
+      <h3>Estaciones del Tren Urquiza</h3>
+      <ol class="stlist"><li><a href="#lacroze-lemos">Federico Lacroze</a></li><li><a href="#artigas-lacroze">José Artigas</a></li><li><a href="#arata-lacroze">Pedro N. Arata</a></li><li><a href="#beiro-lacroze">Dr. Francisco Beiró</a></li><li><a href="#libertador-lacroze">El Libertador</a></li><li><a href="#devoto-lacroze">Antonio Devoto</a></li><li><a href="#lynch-lacroze">Coronel Francisco Lynch</a></li><li><a href="#fmoreno-lacroze">Fernández Moreno</a></li><li><a href="#lourdes-lacroze">Lourdes</a></li><li><a href="#tropezon-lacroze">Tropezón</a></li><li><a href="#bosch-lacroze">José María Bosch</a></li><li><a href="#coronado-lacroze">Martín Coronado</a></li><li><a href="#podesta-lacroze">Pablo Podestá</a></li><li><a href="#newbery-lacroze">Jorge Newbery</a></li><li><a href="#dario-lacroze">Rubén Darío</a></li><li><a href="#eandes-lacroze">Ejército de los Andes</a></li><li><a href="#delasalle-lacroze">Juan B. de La Salle</a></li><li><a href="#barrufaldi-lacroze">Sargento Barrufaldi</a></li><li><a href="#lozano-lacroze">Capitán Lozano</a></li><li><a href="#agneta-lacroze">Teniente Agneta</a></li><li><a href="#campodemayo-lacroze">Campo de Mayo</a></li><li><a href="#cabral-lacroze">Sargento Cabral</a></li><li><a href="#lemos-lacroze">General Lemos</a></li></ol>
+    </div>
+  </section>
+
+  <aside class="ad ad-final" data-slot="final" hidden></aside>
+
+  <footer class="foot">
+    <nav>
+      <a href="privacidad.html">Política de privacidad</a>
+      <a href="https://metrovias.com.ar/index.php/horarios-del-servicio-linea-urquiza/">Horarios oficiales (Metrovías)</a>
+      <a href="https://x.com/Metrovias">Estado del servicio en vivo</a>
+    </nav>
+    <p>Página no oficial, sin relación con Metrovías. Horarios del cuadro «Invierno 2026», vigente desde el 2 de marzo de 2026. La posición de los trenes sale del horario, no de un GPS.</p>
   </footer>
 </main>
+
+<dialog class="sheet" id="sheet" aria-labelledby="sheetTitle">
+  <div class="sheet-in">
+    <div class="sheet-head"><h3 id="sheetTitle">Elegí la estación</h3><button class="close" id="sheetClose" type="button" aria-label="Cerrar">×</button></div>
+    <input class="search" id="search" type="search" placeholder="Buscar estación" autocomplete="off" aria-label="Buscar estación">
+    <ol class="stations" id="stations"></ol>
+  </div>
+</dialog>
+<div class="toast" id="toast" role="status" hidden></div>
 
 <script id="data" type="application/json">{"habil":{"L":["60|3222222222322141322223","160|3222222222322141322223","215|3222222222322141322223","260|3222222222222141322223","275|3222222222222141322223","300|3222222222222141322223","314|3222222222222141322223","324|3222222222222141322223","334|3222222222222141322223","344|3222222222222141322223","354|3222222222222141322223","364|3222222222322141222223","374|3222222222322141222223","383|3222222222322141222223","391|3222222222322141222223","399|3222222222322141222223","407|3222222222322141222223","415|3222222222322141222223","423|3222222222322141222223","431|3222222222322141222223","439|3222222222322141222223","447|3222222222322141222223","455|3222222222322141222223","467|3222222222322141222223","477|3222222222322141222223","487|3222222222322141222223","497|3222222222322141222223","507|3222222222322141222223","517|3222222222322141222223","527|3222222222322141222223","537|3222222222322141222223","547|3222222222322141222223","562|3222222222322141222223","579|3222222222322141222223","599|3222222222322141222223","615|3222222222322141222223","630|3222222222322141222223","645|3222222222322141222223","660|3222222222322141222223","675|3222222222322141222223","690|3222222222322141222223","705|3222222222322141222223","720|3222222222322141222223","735|3222222222322141222223","750|3222222222322141222223","765|3222222222322141222223","780|3222222222322141222223","795|3222222222322141222223","810|3222222222322141222223","825|3222222222322141222223","840|3222222222322141222223","855|3222222222322141222223","870|3222222222322141222223","885|3222222222322141222223","900|3222222222322141222223","915|3222222222322141222223","930|3222222222322141222223","945|3222222222322141222223","960|3222222222322141322223","975|3222222222322141322223","990|3222222222322141322223","1005|3222222222322141322223","1020|3222222222322141322223","1030|3222222222322141322223","1040|3222222222322141322223","1050|3222222222322141322223","1060|3222222222322141322223","1070|3222222222322141322223","1080|3222222222322141322223","1090|3222222222322141322223","1100|3222222222322141322223","1110|3222222222322141322223","1120|3222222222322141322223","1130|3222222222322141322223","1140|3222222222322141322223","1150|3222222222322141322223","1160|3222222222322141322223","1170|3222222222322141322223","1180|3222222222322141322223","1190|3222222222322141322223","1200|3222222222322141322223","1215|3222222222322141322223","1230|3222222222322141322223","1245|3222222222322141322223","1260|3222222222322141322223","1280|3222222222322141322223","1300|3222222222322141322223","1320|3222222222322141322223","1340|3222222222322141322223","1360|3222222222322141322223","1386|3222222222322141322223","1430|3222222222322141322223"],"C":["60|2212232422232222211325","150|2212232422232222211325","225|2212232422232222211325","270|2212232422232222211325","285|2212232422232222211325","300|2212232422332222211325","315|2212232422332222211325","330|2212232422332222211325","340|2212232422332222211325","351|2212232422332222211325","361|2212232422332222221325","371|2212232422332222221325","381|2212232422332222221325","391|2212232422332222221325","400|2212232422332222221325","408|2212232422332222221325","418|2212232422332222221325","428|2212232422332222221325","438|2212232422332222221325","446|2212232422332222221325","454|2212232422332222221325","462|2212232422332222221325","470|2212232422332222221325","478|2212232422332222221325","486|2212232422332222221325","494|2212232422332222221325","502|2212232422332222221325","509|2212232422332222221325","519|2212232422332222221325","529|2212232422332222221325","539|2212232422332222221325","549|2212232422332222221325","559|2212232422332222221325","569|2212232422332222221325","579|2212232422332222221325","589|2212232422332222221325","599|2212232422332222221325","614|2212232422332222221325","631|2212232422332222221325","651|2212232422332222221325","667|2212232422332222221325","682|2212232422332222221325","697|2212232422332222211325","712|2212232422332222211325","727|2212232422332222221325","742|2212232422332222211325","757|2212232422332222211325","772|2212232422332222211325","787|2212232422332222221325","802|2212232422332222211325","817|2212232422332222211325","832|2212232422332222211325","847|2212232422332222221325","862|2212232422332222211325","877|2212232422332222211325","892|2212232422332222211325","907|2212232422332222221325","922|2212232422332222211325","937|2212232422332222211325","952|2212232422332222211325","967|2212232422332222221325","982|2212232422332222211325","997|2212232422332222211325","1013|2212232422332222211325","1028|2212232422332222211325","1043|2212232422332222211325","1058|2212232422332222211325","1073|2212232422332222211325","1083|2212232422332222211325","1093|2212232422332222211325","1103|2212232422332222211325","1113|2212232422332222211325","1123|2212232422332222211325","1133|2212232422332222211325","1143|2212232422332222211325","1153|2212232422332222211325","1163|2212232422332222211325","1173|2212232422332222211325","1183|2212232422332222211325","1193|2212232422332222211325","1203|2212232422332222211325","1213|2212232422332222211325","1223|2212232422332222211325","1243|2212232422232222211325","1263|2212232422232222211325","1283|2212232422232222211325","1301|2212232422232222211325","1321|2212232422232222211325","1333|2212232422232222211325","1353|2212232422232222211325","1373|2212232422232222211325","1401|2212232422232222211325","1439|2212232422232222211325"]},"sabado":{"L":["60|3222222222222141222223","160|3222222222222141222223","215|3222222222222141222223","280|3222222222222141222223","300|3222222222322141222223","320|3222222222322141222223","340|3222222222322141222223","360|3222222222322141222223","375|3222222222322141222223","390|3222222222322141222223","405|3222222222322141222223","420|3222222222322141222223","435|3222222222322141222223","450|3222222222322141222223","465|3222222222322141222223","480|3222222222322141222223","495|3222222222322141222223","510|3222222222322141222223","525|3222222222322141222223","540|3222222222322141222223","555|3222222222322141222223","570|3222222222322141222223","585|3222222222322141222223","600|3222222222322141222223","615|3222222222322141222223","630|3222222222322141222223","645|3222222222322141222223","660|3222222222322141222223","675|3222222222322141222223","690|3222222222322141222223","705|3222222222322141222223","720|3222222222322141222223","740|3222222222322141222223","760|3222222222322141222223","780|3222222222322141222223","800|3222222222322141222223","820|3222222222322141222223","840|3222222222322141222223","860|3222222222322141222223","880|3222222222322141222223","900|3222222222322141222223","920|3222222222322141222223","940|3222222222322141222223","960|3222222222322141222223","980|3222222222322141222223","1000|3222222222322141222223","1020|3222222222322141222223","1040|3222222222322141222223","1060|3222222222322141222223","1080|3222222222322141222223","1100|3222222222322141222223","1120|3222222222322141222223","1140|3222222222322141222223","1160|3222222222322141222223","1180|3222222222322141222223","1200|3222222222322141222223","1223|3222222222322141222223","1253|3222222222322141222223","1283|3222222222322141222223","1313|3222222222322141222223","1343|3222222222322141222223","1373|3222222222322141222223","1391|3222222222322141222223","1430|3222222222322141222223"],"C":["60|2212232422232222211325","150|2212232422232222211325","225|2212232422232222211325","270|2212232422232222211325","300|2212232422332222211325","330|2212232422332222211325","352|2212232422332222211325","372|2212232422332222211325","392|2212232422332222211325","412|2212232422332222211325","427|2212232422332222211325","442|2212232422332222211325","457|2212232422332222211325","472|2212232422332222211325","487|2212232422332222211325","502|2212232422332222211325","517|2212232422332222211325","532|2212232422332222211325","547|2212232422332222211325","562|2212232422332222211325","577|2212232422332222211325","592|2212232422332222211325","607|2212232422332222211325","622|2212232422332222211325","637|2212232422332222211325","652|2212232422332222211325","667|2212232422332222211325","682|2212232422332222211325","697|2212232422332222211325","712|2212232422332222211325","727|2212232422332222211325","742|2212232422332222211325","757|2212232422332222211325","772|2212232422332222211325","792|2212232422332222211325","812|2212232422332222211325","832|2212232422332222211325","852|2212232422332222211325","872|2212232422332222211325","892|2212232422332222211325","912|2212232422332222211325","932|2212232422332222211325","952|2212232422332222211325","972|2212232422332222211325","992|2212232422332222211325","1012|2212232422332222211325","1032|2212232422332222211325","1052|2212232422332222211325","1072|2212232422332222211325","1092|2212232422332222211325","1112|2212232422332222211325","1132|2212232422332222211325","1152|2212232422332222211325","1172|2212232422332222211325","1192|2212232422332222211325","1212|2212232422332222211325","1232|2212232422332222211325","1252|2212232422332222211325","1288|2212232422332222211325","1308|2212232422332222211325","1338|2212232422332222211325","1368|2212232422332222211325","1398|2212232422332222211325","1428|2212232422332222211325"]},"domingo":{"L":["60|3222222222322141222223","265|3222222222322141222223","315|3222222222322141222223","360|3222222222322141222223","390|3222222222322141222223","420|3222222222322141222223","450|3222222222322141222223","480|3222222222322141222223","510|3222222222322141222223","540|3222222222322141222223","570|3222222222322141222223","600|3222222222322141222223","630|3222222222322141222223","660|3222222222322141222223","690|3222222222322141222223","720|3222222222322141222223","750|3222222222322141222223","780|3222222222322141222223","810|3222222222322141222223","840|3222222222322141222223","870|3222222222322141222223","900|3222222222322141222223","930|3222222222322141222223","960|3222222222322141222223","990|3222222222322141222223","1020|3222222222322141222223","1050|3222222222322141222223","1080|3222222222322141222223","1110|3222222222322141222223","1140|3222222222322141222223","1170|3222222222322141222223","1200|3222222222322141222223","1230|3222222222322141222223","1260|3222222222322141222223","1290|3222222222322141222223","1320|3222222222322141222223","1360|3222222222322141222223","1430|3222222222322141222223"],"C":["1|2212232422332222211325","192|2212232422332222211325","255|2212232422332222211325","330|2212232422332222211325","380|2212232422332222211325","415|2212232422332222211325","445|2212232422332222211325","475|2212232422332222211325","505|2212232422332222211325","535|2212232422332222211325","565|2212232422332222211325","595|2212232422332222211325","625|2212232422332222211325","655|2212232422332222211325","685|2212232422332222211325","715|2212232422332222211325","745|2212232422332222211325","775|2212232422332222211325","805|2212232422332222211325","835|2212232422332222211325","865|2212232422332222211325","895|2212232422332222211325","925|2212232422332222211325","955|2212232422332222211325","985|2212232422332222211325","1015|2212232422332222211325","1045|2212232422332222211325","1075|2212232422332222211325","1105|2212232422332222211325","1135|2212232422332222211325","1165|2212232422332222211325","1195|2212232422332222211325","1225|2212232422332222211325","1255|2212232422332222211325","1285|2212232422332222211325","1315|2212232422332222211325","1345|2212232422332222211325","1375|2212232422332222211325","1415|2212232422332222211325"]},"flags":{"noFeriado":{"domingo":{"C":[0]}}}}</script>
 <script>
 (function(){
 "use strict";
+
+/* ===== ANUNCIOS =====
+   Cuando Google AdSense apruebe el sitio:
+   ADS_CLIENT = "ca-pub-XXXXXXXXXXXXXXXX" (tu ID de editor)
+   ADS_SLOTS  = { medio:"1234567890", final:"0987654321" } (los IDs de los bloques de anuncios)
+   Para ver dónde van los anuncios antes de tenerlos, abrí la página con ?anuncios al final del link. */
+var ADS_CLIENT = "";
+var ADS_SLOTS = { medio:"", final:"" };
+
 var RAW = JSON.parse(document.getElementById('data').textContent);
 var ST = [
-  ["Federico Lacroze","Lacroze","lacroze"],
-  ["José Artigas","Artigas","artigas"],
-  ["Pedro N. Arata","Arata","arata"],
-  ["Dr. Francisco Beiró","Beiró","beiro"],
-  ["El Libertador","El Libertador","libertador"],
-  ["Antonio Devoto","Devoto","devoto"],
-  ["Coronel Francisco Lynch","Lynch","lynch"],
-  ["Fernández Moreno","F. Moreno","fmoreno"],
-  ["Lourdes","Lourdes","lourdes"],
-  ["Tropezón","Tropezón","tropezon"],
-  ["José María Bosch","Bosch","bosch"],
-  ["Martín Coronado","Coronado","coronado"],
-  ["Pablo Podestá","Podestá","podesta"],
-  ["Jorge Newbery","Newbery","newbery"],
-  ["Rubén Darío","Darío","dario"],
-  ["Ejército de los Andes","Ej. de los Andes","eandes"],
-  ["Juan B. de La Salle","De La Salle","delasalle"],
-  ["Sargento Barrufaldi","Barrufaldi","barrufaldi"],
-  ["Capitán Lozano","Lozano","lozano"],
-  ["Teniente Agneta","Agneta","agneta"],
-  ["Campo de Mayo","Campo de Mayo","campodemayo"],
-  ["Sargento Cabral","Sgto. Cabral","cabral"],
-  ["General Lemos","Lemos","lemos"]
+  ["Federico Lacroze","Lacroze","lacroze"],["José Artigas","Artigas","artigas"],["Pedro N. Arata","Arata","arata"],
+  ["Dr. Francisco Beiró","Beiró","beiro"],["El Libertador","El Libertador","libertador"],["Antonio Devoto","Devoto","devoto"],
+  ["Coronel Francisco Lynch","Lynch","lynch"],["Fernández Moreno","F. Moreno","fmoreno"],["Lourdes","Lourdes","lourdes"],
+  ["Tropezón","Tropezón","tropezon"],["José María Bosch","Bosch","bosch"],["Martín Coronado","Coronado","coronado"],
+  ["Pablo Podestá","Podestá","podesta"],["Jorge Newbery","Newbery","newbery"],["Rubén Darío","Darío","dario"],
+  ["Ejército de los Andes","Ej. de los Andes","eandes"],["Juan B. de La Salle","De La Salle","delasalle"],
+  ["Sargento Barrufaldi","Barrufaldi","barrufaldi"],["Capitán Lozano","Lozano","lozano"],["Teniente Agneta","Agneta","agneta"],
+  ["Campo de Mayo","Campo de Mayo","campodemayo"],["Sargento Cabral","Sgto. Cabral","cabral"],["General Lemos","Lemos","lemos"]
 ];
 var N = ST.length;
 var DAYNAME = {habil:"Hábil", sabado:"Sábado", domingo:"Domingo", feriado:"Feriado"};
@@ -269,8 +423,7 @@ function expand(day, dir){
   return RAW[day][dir].map(function(s, k){
     var p = s.split('|'), cur = +p[0], seq = [cur];
     for (var i = 0; i < p[1].length; i++){ cur += +p[1][i]; seq.push(cur); }
-    var t = dir === 'L' ? seq : seq.slice().reverse(); // t[i] = minuto en la estación i (0 = Lacroze)
-    return {t:t, dir:dir, id:day+dir+k, noFer:noFer.indexOf(k) >= 0};
+    return {t: dir === 'L' ? seq : seq.slice().reverse(), dir:dir, id:day+dir+k, noFer:noFer.indexOf(k) >= 0};
   });
 }
 var SCHED = {};
@@ -280,13 +433,12 @@ function trainsFor(type, dir){
   return SCHED[type][dir];
 }
 
-/* ---------- fechas y feriados (hora de Buenos Aires) ---------- */
+/* ---------- fecha y feriados (hora de Buenos Aires) ---------- */
 var fmtBA = new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
 function nowBA(){
   var o = {};
   fmtBA.formatToParts(new Date()).forEach(function(p){ o[p.type] = p.value; });
-  var h = +o.hour % 24;
-  return {y:+o.year, m:+o.month, d:+o.day, min: h*60 + (+o.minute) + (+o.second)/60};
+  return {y:+o.year, m:+o.month, d:+o.day, min:(+o.hour % 24)*60 + (+o.minute) + (+o.second)/60};
 }
 function ymd(y,m,d){ var dt = new Date(Date.UTC(y,m-1,d)); return {y:dt.getUTCFullYear(), m:dt.getUTCMonth()+1, d:dt.getUTCDate(), wd:dt.getUTCDay()}; }
 function addDays(date, n){ return ymd(date.y, date.m, date.d + n); }
@@ -295,21 +447,18 @@ var ferCache = {};
 function feriados(y){
   if (ferCache[y]) return ferCache[y];
   var s = {};
-  function add(m,d){ var x = ymd(y,m,d); s[key(x)] = 1; }
+  function add(m,d){ s[key(ymd(y,m,d))] = 1; }
   [[1,1],[3,24],[4,2],[5,1],[5,25],[6,20],[7,9],[12,8],[12,25]].forEach(function(f){ add(f[0],f[1]); });
-  // Pascua (algoritmo gregoriano)
   var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),
       h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,mm=Math.floor((a+11*h+22*l)/451),
       em=Math.floor((h+l-7*mm+114)/31), ed=((h+l-7*mm+114)%31)+1;
-  add(em, ed-48); add(em, ed-47); add(em, ed-2); // carnaval lunes y martes, viernes santo
-  // trasladables (Ley 27.399)
+  add(em, ed-48); add(em, ed-47); add(em, ed-2);
   [[8,17],[10,12],[11,20]].forEach(function(f){
     var x = ymd(y,f[0],f[1]), off = 0;
     if (x.wd === 2) off = -1; else if (x.wd === 3) off = -2; else if (x.wd === 4) off = 4; else if (x.wd === 5) off = 3;
     add(f[0], f[1]+off);
   });
-  var gx = ymd(y,6,17), goff = gx.wd === 3 ? -2 : gx.wd === 4 ? 4 : gx.wd === 5 ? 3 : 0;
-  add(6, 17+goff);
+  var gx = ymd(y,6,17); add(6, 17 + (gx.wd === 3 ? -2 : gx.wd === 4 ? 4 : gx.wd === 5 ? 3 : 0));
   ferCache[y] = s; return s;
 }
 function typeOf(date){
@@ -323,155 +472,137 @@ function typeOf(date){
 function pad(n){ return (n < 10 ? '0' : '') + n; }
 function hhmm(m){ m = Math.round(m); m = ((m % 1440) + 1440) % 1440; return pad(Math.floor(m/60)) + ':' + pad(m % 60); }
 function untilTxt(diff){
-  if (diff < 0.5) return 'sale ahora';
-  var m = Math.round(diff);
+  if (diff < 1) return 'sale ahora';
+  var m = Math.floor(diff);
   if (m < 60) return 'en ' + m + ' min';
   var h = Math.floor(m/60), r = m % 60;
   return 'en ' + h + ' h' + (r ? ' ' + pad(r) : '');
 }
 function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function norm(s){ return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); }
 var store = {
   get:function(k, def){ try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch(e){ return def; } },
   set:function(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
 };
+var $ = function(id){ return document.getElementById(id); };
+var toastTimer;
+function toast(t){ var el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(function(){ el.hidden = true; }, 2600); }
 
 /* ---------- estado ---------- */
-var S = {
-  from: 11, to: 0,
-  day: 'hoy',          // 'hoy' | habil | sabado | domingo | feriado
-  at: null,            // null = en vivo; si no, minuto elegido
-  showAll: false,
-  pick: null           // id de tren elegido a mano
-};
-var favs = store.get('urq.favs', [[11,0],[0,11]]);
+var S = { from:11, to:0, day:'hoy', at:null, showAll:false, pick:null, fullLine:false, sheetFor:null, whenOpen:false };
+var recents = store.get('urq.recent', null);
+if (!recents){ recents = store.get('urq.favs', []); }
+recents = (recents || []).filter(function(r){ return r && r.length === 2 && r[0] !== r[1] && r[0] >= 0 && r[0] < N && r[1] >= 0 && r[1] < N; }).slice(0, 5);
 var last = store.get('urq.last', null);
-if (last && last.length === 2) { S.from = last[0]; S.to = last[1]; }
+if (last && last.length === 2 && last[0] !== last[1]) { S.from = last[0]; S.to = last[1]; }
 readHash();
 
+function slugIdx(sl){ for (var i = 0; i < N; i++) if (ST[i][2] === sl) return i; return -1; }
 function readHash(){
-  var h = (location.hash || '').replace(/^#/, '');
-  if (!h) return false;
-  var parts = h.split('-'), a = -1, b = -1;
-  for (var i = 0; i < N; i++){ if (ST[i][2] === parts[0]) a = i; if (ST[i][2] === parts[1]) b = i; }
+  var h = (location.hash || '').replace(/^#/, ''), parts = h.split('-');
+  if (parts.length !== 2) return false;
+  var a = slugIdx(parts[0]), b = slugIdx(parts[1]);
   if (a >= 0 && b >= 0 && a !== b){ S.from = a; S.to = b; return true; }
   return false;
 }
-function writeHash(){
-  try { var h = '#' + ST[S.from][2] + '-' + ST[S.to][2]; if (location.hash !== h) location.replace(h); } catch(e){}
+function routeHash(){ return '#' + ST[S.from][2] + '-' + ST[S.to][2]; }
+function writeHash(){ try { if (location.hash !== routeHash()) history.replaceState(null, '', routeHash()); } catch(e){} }
+function remember(){
+  store.set('urq.last', [S.from, S.to]);
+  recents = [[S.from, S.to]].concat(recents.filter(function(r){ return !(r[0] === S.from && r[1] === S.to); })).slice(0, 5);
+  store.set('urq.recent', recents);
 }
 
 /* ---------- consulta ---------- */
-// Devuelve el "contexto": tipo de día, minuto de referencia y lista de viajes con dep/arr en minutos relativos al día elegido.
 function context(){
-  var n = nowBA(), today = ymd(n.y, n.m, n.d);
-  var ref = S.at === null ? n.min : S.at;
-  var auto = S.day === 'hoy';
-  var type = auto ? typeOf(today) : S.day;
-  return {now:n, today:today, ref:ref, auto:auto, type:type};
+  var n = nowBA(), today = ymd(n.y, n.m, n.d), auto = S.day === 'hoy';
+  return {now:n, today:today, ref: S.at === null ? n.min : S.at, auto:auto, type: auto ? typeOf(today) : S.day};
 }
 function trips(ctx, o, d){
   var dir = o < d ? 'L' : 'C', out = [];
   function push(list, off, tag){
-    list.forEach(function(tr){
-      var dep = tr.t[o] + off, arr = tr.t[d] + off;
-      out.push({tr:tr, off:off, dep:dep, arr:arr, dur:arr-dep, tag:tag});
-    });
+    list.forEach(function(tr){ var dep = tr.t[o] + off, arr = tr.t[d] + off; out.push({tr:tr, off:off, dep:dep, arr:arr, dur:arr-dep, tag:tag}); });
   }
   push(trainsFor(ctx.type, dir), 0, null);
   if (ctx.auto){
-    var yType = typeOf(addDays(ctx.today, -1));
-    push(trainsFor(yType, dir).filter(function(tr){ return tr.t[o] >= 1440; }), -1440, null);
-    var tType = typeOf(addDays(ctx.today, 1));
-    push(trainsFor(tType, dir), 1440, 'mañana');
+    push(trainsFor(typeOf(addDays(ctx.today, -1)), dir).filter(function(tr){ return tr.t[o] >= 1440; }), -1440, null);
+    push(trainsFor(typeOf(addDays(ctx.today, 1)), dir), 1440, 'mañana');
   }
   out.forEach(function(x){ if (!x.tag && x.dep >= 1440) x.tag = 'mañana'; });
   out.sort(function(a,b){ return a.dep - b.dep; });
   return out;
 }
-// Posición (índice de estación fraccionario) de un tren al minuto m, o null si no está circulando
 function posAt(tr, off, m){
   var t = tr.t, seq = [];
   for (var i = 0; i < N; i++) seq.push(tr.dir === 'L' ? i : N-1-i);
-  var first = t[seq[0]] + off, lastT = t[seq[N-1]] + off;
-  if (m < first - 0.01 || m > lastT + 0.5) return null;
+  if (m < t[seq[0]] + off - 0.01 || m > t[seq[N-1]] + off + 0.5) return null;
   for (var k = 0; k < N-1; k++){
     var a = t[seq[k]] + off, b = t[seq[k+1]] + off;
-    if (m <= b){
-      var f = b > a ? Math.max(0, (m - a) / (b - a)) : 0;
-      return {p: seq[k] + f * (seq[k+1] - seq[k]), k:k, f:f, seq:seq};
-    }
+    if (m <= b){ var f = b > a ? Math.max(0, (m - a) / (b - a)) : 0; return {p: seq[k] + f * (seq[k+1] - seq[k]), k:k, f:f, seq:seq}; }
   }
   return {p: seq[N-1], k:N-1, f:0, seq:seq, done:true};
 }
 
 /* ---------- interfaz ---------- */
-var $ = function(id){ return document.getElementById(id); };
-function fillSelects(){
-  ['from','to'].forEach(function(id){
-    $(id).innerHTML = ST.map(function(s, i){ return '<option value="' + i + '">' + esc(s[0]) + '</option>'; }).join('');
-  });
-}
-function renderControls(ctx){
-  $('from').value = S.from; $('to').value = S.to;
+function renderPicker(ctx){
+  $('fromName').textContent = ST[S.from][0];
+  $('toName').textContent = ST[S.to][0];
+  var rs = recents.filter(function(r){ return !(r[0] === S.from && r[1] === S.to); }).slice(0, 4);
+  $('recents').hidden = rs.length === 0;
+  $('recents').innerHTML = rs.length ? '<span class="lbl">Recientes</span>' + rs.map(function(r){
+    return '<button type="button" class="chip" data-r="' + r[0] + '-' + r[1] + '">' + esc(ST[r[0]][1]) + ' → ' + esc(ST[r[1]][1]) + '</button>';
+  }).join('') : '';
   var todayType = typeOf(ctx.today);
-  var days = [['hoy','Hoy · ' + DAYNAME[todayType]],['habil','Hábil'],['sabado','Sábado'],['domingo','Domingo'],['feriado','Feriado']];
-  $('days').innerHTML = days.map(function(d){
-    return '<button type="button" data-day="' + d[0] + '" aria-pressed="' + (S.day === d[0]) + '">' + esc(d[1]) + '</button>';
-  }).join('');
-  var isFav = favs.some(function(f){ return f[0] === S.from && f[1] === S.to; });
-  $('favs').innerHTML = favs.map(function(f, i){
-    var on = f[0] === S.from && f[1] === S.to;
-    return '<button type="button" class="chip" data-fav="' + i + '" aria-pressed="' + on + '">' + esc(ST[f[0]][1]) + ' → ' + esc(ST[f[1]][1]) + '</button>';
-  }).join('') + '<button type="button" class="chip ghost" id="favToggle">' + (isFav ? '✕ Quitar de guardados' : '☆ Guardar este viaje') + '</button>';
+  var label = ctx.auto ? 'Hoy, ' + DAYLONG[todayType] : 'Horario de ' + DAYLONG[ctx.type];
+  $('whenTxt').innerHTML = (S.at === null && ctx.auto ? '<i class="dotlive" aria-hidden="true"></i>' : '') + '<span><b>' + esc(label) + '</b> · ' + (S.at === null ? 'ahora ' + hhmm(Math.floor(ctx.now.min)) : 'desde las ' + hhmm(S.at)) + '</span>';
+  $('whenBtn').textContent = S.whenOpen ? 'Listo' : 'Cambiar día u hora';
+  $('whenBtn').setAttribute('aria-expanded', String(S.whenOpen));
+  $('whenPanel').hidden = !S.whenOpen;
+  var days = [['hoy','Hoy (' + DAYNAME[todayType] + ')'],['habil','Hábil'],['sabado','Sábado'],['domingo','Domingo'],['feriado','Feriado']];
+  $('days').innerHTML = days.map(function(d){ return '<button type="button" data-day="' + d[0] + '" aria-pressed="' + (S.day === d[0]) + '">' + esc(d[1]) + '</button>'; }).join('');
   if (document.activeElement !== $('at')) $('at').value = hhmm(ctx.ref);
-  $('liveTag').hidden = S.at !== null;
   $('nowBtn').hidden = S.at === null;
 }
 
 var lastBoardKey = '';
 function render(){
-  var ctx = context();
-  $('clock').textContent = hhmm(Math.floor(ctx.now.min));
-  renderControls(ctx);
-  var o = S.from, d = S.to;
-  var board = $('board');
-  if (o === d){
-    board.classList.add('empty');
-    $('bRoute').textContent = '';
-    $('bDep').textContent = '—';
-    $('bIn').innerHTML = 'Elegí dos estaciones distintas';
-    $('bFoot').innerHTML = '';
-    $('facts').innerHTML = ''; $('list').innerHTML = ''; $('diagram').innerHTML = ''; $('tripStatus').textContent = '';
-    $('moreBtn').hidden = true;
-    return;
-  }
-  $('moreBtn').hidden = false;
+  var ctx = context(), o = S.from, d = S.to;
+  renderPicker(ctx);
   var all = trips(ctx, o, d);
   var dayTrips = all.filter(function(x){ return x.off === 0; });
   var upcoming = all.filter(function(x){ return x.dep >= ctx.ref - 0.25; });
-  if (!ctx.auto) upcoming = upcoming.filter(function(x){ return x.off === 0; });
-  var next = upcoming[0] || null;
-  var stops = Math.abs(d - o) - 1;
-  var routeTxt = ST[o][1] + ' → ' + ST[d][1];
+  var next = upcoming[0] || null, live = S.at === null;
 
   /* tablero */
-  $('bRoute').textContent = routeTxt;
+  $('bRoute').textContent = ST[o][1] + ' → ' + ST[d][1];
+  var big = $('bBig');
   if (next){
-    board.classList.remove('empty');
+    var diff = next.dep - ctx.ref, num, unit, word = false;
+    if (!live){ num = hhmm(next.dep); unit = ''; $('bKicker').textContent = 'Primer tren desde las ' + hhmm(ctx.ref); }
+    else {
+      $('bKicker').textContent = 'Próximo tren';
+      if (diff < 1){ num = 'Ahora'; unit = ''; word = true; }
+      else if (diff < 60){ num = String(Math.floor(diff)); unit = 'min'; }
+      else { var mm = Math.floor(diff); num = Math.floor(mm/60) + ':' + pad(mm % 60); unit = 'h'; }
+    }
+    big.classList.toggle('word', word);
+    $('bNum').textContent = num; $('bUnit').textContent = unit;
     var bk = next.tr.id + ':' + next.off;
-    var dep = $('bDep');
-    dep.textContent = hhmm(next.dep);
-    if (bk !== lastBoardKey){ dep.classList.remove('flip'); void dep.offsetWidth; dep.classList.add('flip'); lastBoardKey = bk; }
-    var diff = next.dep - ctx.ref;
-    $('bIn').innerHTML = esc(S.at === null ? untilTxt(diff) : 'el primero desde las ' + hhmm(ctx.ref)) +
-      (next.tag ? '<small>' + esc(next.tag) + '</small>' : '<small>de ' + esc(ST[o][0]) + '</small>');
-    $('bFoot').innerHTML = '<span>Llega <b class="tab">' + hhmm(next.arr) + '</b></span><span><b>' + next.dur + ' min</b> de viaje</span><span>' +
-      (stops === 0 ? 'sin paradas en el medio' : stops + (stops === 1 ? ' parada' : ' paradas') + ' en el medio') + '</span>';
+    if (bk !== lastBoardKey){ big.classList.remove('flip'); void big.offsetWidth; big.classList.add('flip'); lastBoardKey = bk; }
+    $('bLine').innerHTML = 'Sale <b class="tab">' + hhmm(next.dep) + '</b>' + (next.tag ? ' (' + esc(next.tag) + ')' : '') +
+      '<span class="sep">·</span>llega <b class="tab">' + hhmm(next.arr) + '</b><span class="sep">·</span><b>' + next.dur + ' min</b>';
+    var af = upcoming.slice(1, 3);
+    $('bAfter').hidden = af.length === 0;
+    $('bAfter').innerHTML = '<span class="k">Después</span>' + af.map(function(x){
+      return '<span class="t tab">' + hhmm(x.dep) + (live ? '<small>' + esc(untilTxt(x.dep - ctx.ref).replace('en ','')) + '</small>' : '') + '</span>';
+    }).join('');
   } else {
-    board.classList.add('empty');
-    $('bDep').textContent = 'Sin trenes';
-    $('bIn').innerHTML = '<small>No hay más trenes ese ' + DAYLONG[ctx.type] + ' después de las ' + hhmm(ctx.ref) + '.</small>';
-    $('bFoot').innerHTML = dayTrips.length ? '<span>El primero sale a las <b class="tab">' + hhmm(dayTrips[0].dep) + '</b></span>' : '';
+    big.classList.add('word');
+    $('bKicker').textContent = 'Sin más trenes';
+    $('bNum').textContent = 'Fin'; $('bUnit').textContent = '';
+    $('bLine').textContent = 'No hay más trenes ese ' + DAYLONG[ctx.type] + ' después de las ' + hhmm(ctx.ref) + '.';
+    $('bAfter').hidden = dayTrips.length === 0;
+    $('bAfter').innerHTML = dayTrips.length ? '<span class="k">El primero</span><span class="t tab">' + hhmm(dayTrips[0].dep) + '</span>' : '';
   }
 
   /* datos rápidos */
@@ -479,34 +610,22 @@ function render(){
   var dmin = Math.min.apply(null, durs), dmax = Math.max.apply(null, durs);
   var gaps = [];
   for (var i = 1; i < Math.min(upcoming.length, 6); i++) gaps.push(Math.round(upcoming[i].dep - upcoming[i-1].dep));
-  var facts = '<div class="fact">Tarda <b>' + (dmin === dmax ? dmin : dmin + '–' + dmax) + ' min</b></div>';
-  var gmax0 = gaps.length ? Math.max.apply(null, gaps) : 999;
-  if (gaps.length >= 2 && gmax0 <= 60){
-    var gmin = Math.min.apply(null, gaps), gmax = gmax0;
-    facts += '<div class="fact">Pasa cada <b>' + (gmin === gmax ? gmin : gmin + '–' + gmax) + ' min</b> a esta hora</div>';
-  }
-  facts += '<div class="fact"><b>' + dayTrips.length + '</b> trenes por ' + DAYLONG[ctx.type] + '</div>';
-  $('facts').innerHTML = facts;
+  var f = 'Tarda ' + (dmin === dmax ? dmin : dmin + '–' + dmax) + ' min';
+  if (gaps.length >= 2 && Math.max.apply(null, gaps) <= 60){ var g1 = Math.min.apply(null, gaps), g2 = Math.max.apply(null, gaps); f += ' · cada ' + (g1 === g2 ? g1 : g1 + '–' + g2) + ' min'; }
+  $('facts').textContent = f;
 
   /* lista */
-  var list, showPast = false;
-  if (S.showAll){
-    list = dayTrips.slice(); showPast = true;
-    $('listTitle').textContent = 'Todos los trenes · ' + DAYNAME[ctx.type];
-    $('moreBtn').textContent = 'Ver solo los próximos';
-  } else {
-    list = upcoming.slice(0, 8);
-    $('listTitle').textContent = 'Siguientes trenes';
-    $('moreBtn').textContent = 'Ver todos los del día';
-  }
+  var list;
+  if (S.showAll){ list = dayTrips.slice(); $('listTitle').textContent = 'Todos · ' + DAYNAME[ctx.type]; $('moreBtn').textContent = 'Ver solo los próximos'; }
+  else { list = upcoming.slice(0, 8); $('listTitle').textContent = 'Siguientes trenes'; $('moreBtn').textContent = 'Ver todos los del día'; }
   var sel = null;
-  if (S.pick){ sel = all.filter(function(x){ return x.tr.id + ':' + x.off === S.pick; })[0] || null; }
-  if (!sel) { sel = next; S.pick = null; }
+  if (S.pick) sel = all.filter(function(x){ return x.tr.id + ':' + x.off === S.pick; })[0] || null;
+  if (!sel){ sel = next; S.pick = null; }
   var selKey = sel ? sel.tr.id + ':' + sel.off : '';
   $('list').innerHTML = list.length ? list.map(function(x){
     var k = x.tr.id + ':' + x.off, past = x.dep < ctx.ref - 0.25;
-    var inTxt = past ? 'ya salió' : (S.at === null ? untilTxt(x.dep - ctx.ref) : '');
-    return '<li><button type="button" class="trow' + (past && showPast ? ' past' : '') + '" data-k="' + k + '" aria-current="' + (k === selKey) + '">' +
+    var inTxt = past ? 'ya salió' : (live ? untilTxt(x.dep - ctx.ref) : '');
+    return '<li><button type="button" class="trow' + (past && S.showAll ? ' past' : '') + '" data-k="' + k + '" aria-current="' + (k === selKey) + '">' +
       '<span class="dep tab">' + hhmm(x.dep) + '</span><span class="ar">→</span><span class="arr tab">' + hhmm(x.arr) + '</span>' +
       '<span class="dur">' + x.dur + ' min' + (x.tag ? '<span class="tag">' + esc(x.tag) + '</span>' : '') + '</span>' +
       '<span class="in">' + esc(inTxt) + '</span></button></li>';
@@ -516,47 +635,41 @@ function render(){
     var cur = $('list').querySelector('.trow:not(.past)');
     if (cur && cur.parentNode.previousElementSibling) cur.parentNode.previousElementSibling.scrollIntoView({block:'nearest'});
   }
-
   renderTrip(ctx, sel, o, d);
 }
 
 function renderTrip(ctx, sel, o, d){
   var dir = o < d ? 'L' : 'C';
-  var order = []; for (var i = 0; i < N; i++) order.push(dir === 'L' ? i : N-1-i); // filas en sentido del viaje
   var rowOf = function(st){ return dir === 'L' ? st : N-1-st; };
+  var stAt = function(r){ return dir === 'L' ? r : N-1-r; };
   var lo = Math.min(rowOf(o), rowOf(d)), hi = Math.max(rowOf(o), rowOf(d));
-  if (!sel){
-    $('tripTitle').textContent = 'Recorrido';
-    $('tripStatus').textContent = 'Elegí un tren de la lista para ver su recorrido.';
-  } else {
-    $('tripTitle').textContent = 'Recorrido del tren de las ' + hhmm(sel.dep);
-  }
+  var r0 = S.fullLine ? 0 : lo, r1 = S.fullLine ? N-1 : hi;
+  $('lineBtn').textContent = S.fullLine ? 'Ver solo mi viaje' : 'Ver toda la línea';
+  $('tripTitle').textContent = sel ? 'Recorrido del tren de las ' + hhmm(sel.dep) : 'Recorrido';
   var html = '';
-  order.forEach(function(st, r){
-    var on = r >= lo && r <= hi, end = st === o || st === d;
+  for (var r = r0; r <= r1; r++){
+    var st = stAt(r), on = r >= lo && r <= hi, end = st === o || st === d;
     var t = sel ? hhmm(sel.tr.t[st] + sel.off) : '';
     var tag = st === o ? '<span class="tag">subís</span>' : st === d ? '<span class="tag">bajás</span>' : '';
     html += '<div class="drow' + (on ? ' on' : '') + (end ? ' end' : '') + '"><span class="t tab">' + t + '</span><span class="dot"></span><span class="n">' + esc(ST[st][0]) + tag + '</span></div>';
-  });
-  var rh = $('diagram').querySelector('.drow') ? $('diagram').querySelector('.drow').getBoundingClientRect().height : 34;
-  rh = rh || 34;
-  var cy = function(row){ return 4 + row * rh + rh / 2; };
-  html += '<div class="rail" style="top:' + cy(0) + 'px;height:' + (cy(N-1) - cy(0)) + 'px"></div>';
+  }
+  var rh = 36;
+  var probe = $('diagram').querySelector('.drow');
+  if (probe && probe.getBoundingClientRect().height) rh = probe.getBoundingClientRect().height;
+  var cy = function(row){ return 4 + (row - r0) * rh + rh / 2; };
+  html += '<div class="rail" style="top:' + cy(r0) + 'px;height:' + (cy(r1) - cy(r0)) + 'px"></div>';
   html += '<div class="rail-on" style="top:' + cy(lo) + 'px;height:' + (cy(hi) - cy(lo)) + 'px"></div>';
-
-  // trenes circulando al minuto de referencia
-  var m = ctx.ref, railX = 58 + 30;
+  var m = ctx.ref, railX = 84, selPos = null;
   var dayLists = [{type:ctx.type, off:0}];
   if (ctx.auto) dayLists.push({type:typeOf(addDays(ctx.today, -1)), off:-1440});
-  var selPos = null;
   ['L','C'].forEach(function(tdir){
     dayLists.forEach(function(dl){
       trainsFor(dl.type, tdir).forEach(function(tr){
         var p = posAt(tr, dl.off, m);
         if (!p || p.done) return;
         var row = dir === 'L' ? p.p : N-1-p.p;
-        var isSel = sel && tr.id === sel.tr.id && dl.off === sel.off;
-        if (isSel){ selPos = p; return; }
+        if (sel && tr.id === sel.tr.id && dl.off === sel.off){ selPos = p; return; }
+        if (row < r0 - 0.01 || row > r1 + 0.01) return;
         var same = tdir === dir;
         html += '<span class="mk ' + (same ? 'same' : 'opp') + '" style="top:' + cy(row).toFixed(1) + 'px;left:' + (railX + (same ? 15 : -15)) + 'px"></span>';
       });
@@ -564,47 +677,98 @@ function renderTrip(ctx, sel, o, d){
   });
   if (selPos){
     var srow = dir === 'L' ? selPos.p : N-1-selPos.p;
-    html += '<span class="mk me" style="top:' + cy(srow).toFixed(1) + 'px;left:' + railX + 'px"></span>';
+    if (srow >= r0 - 0.01 && srow <= r1 + 0.01) html += '<span class="mk me" style="top:' + cy(srow).toFixed(1) + 'px;left:' + railX + 'px"></span>';
   }
   $('diagram').innerHTML = html;
 
+  var txt = 'Elegí un tren de la lista para ver su recorrido.';
   if (sel){
     var when = S.at === null ? 'Ahora' : 'A las ' + hhmm(m);
-    var txt;
-    var startT = sel.tr.t[dir === 'L' ? 0 : N-1] + sel.off;
+    var term = dir === 'L' ? 0 : N-1, startT = sel.tr.t[term] + sel.off;
     if (selPos){
-      var a = ST[selPos.seq[selPos.k]][1], b = selPos.seq[selPos.k+1] !== undefined ? ST[selPos.seq[selPos.k+1]][1] : a;
+      var a = ST[selPos.seq[selPos.k]][1], nb = selPos.seq[selPos.k+1], b = nb !== undefined ? ST[nb][1] : a;
       var where = selPos.f < 0.2 ? 'en ' + a : selPos.f > 0.8 ? 'llegando a ' + b : 'entre ' + a + ' y ' + b;
       var curRow = dir === 'L' ? selPos.p : N-1-selPos.p;
-      if (curRow < rowOf(o) - 0.01) txt = when + ' está <b>' + esc(where) + '</b>. Llega a ' + esc(ST[o][1]) + ' ' + untilTxt(sel.dep - m).replace('sale ahora','ya mismo') + '.';
+      if (curRow < rowOf(o) - 0.01) txt = when + ' está <b>' + esc(where) + '</b>. Llega a ' + esc(ST[o][1]) + ' ' + (sel.dep - m < 1 ? 'ya mismo' : untilTxt(sel.dep - m)) + '.';
       else if (curRow <= rowOf(d)) txt = when + ' está <b>' + esc(where) + '</b>, en tu viaje. Llega a ' + esc(ST[d][1]) + ' a las ' + hhmm(sel.arr) + '.';
       else txt = 'Ya pasó por ' + esc(ST[d][1]) + '.';
-    } else if (m < startT && (o === 0 || o === N-1)){
+    } else if (m < startT && o === term){
       txt = 'Sale de ' + esc(ST[o][0]) + ' a las <b>' + hhmm(sel.dep) + '</b> y llega a ' + esc(ST[d][1]) + ' a las ' + hhmm(sel.arr) + '.';
     } else if (m < startT){
-      txt = 'Todavía no salió de ' + esc(ST[dir === 'L' ? 0 : N-1][0]) + ' (sale ' + hhmm(startT) + '). Pasa por ' + esc(ST[o][1]) + ' a las <b>' + hhmm(sel.dep) + '</b>.';
-    } else {
-      txt = 'Este tren ya terminó el recorrido.';
-    }
-    $('tripStatus').innerHTML = txt;
+      txt = 'Todavía no salió de ' + esc(ST[term][0]) + ' (sale ' + hhmm(startT) + '). Pasa por ' + esc(ST[o][1]) + ' a las <b>' + hhmm(sel.dep) + '</b>.';
+    } else txt = 'Este tren ya terminó el recorrido.';
+  }
+  $('tripStatus').innerHTML = txt;
+}
+
+/* ---------- hoja de estaciones ---------- */
+function openSheet(which){
+  S.sheetFor = which;
+  $('sheetTitle').textContent = which === 'from' ? '¿Desde qué estación?' : '¿Hasta qué estación?';
+  $('search').value = '';
+  fillStations('');
+  var dlg = $('sheet');
+  try { dlg.showModal(); } catch(e){ dlg.setAttribute('open', ''); }
+  if (window.matchMedia('(pointer: fine)').matches) $('search').focus();
+  var cur = $('stations').querySelector('.cur');
+  if (cur) cur.scrollIntoView({block:'center'});
+}
+function closeSheet(){ var dlg = $('sheet'); try { dlg.close(); } catch(e){ dlg.removeAttribute('open'); } S.sheetFor = null; }
+function fillStations(q){
+  var nq = norm(q.trim()), mine = S.sheetFor === 'from' ? S.from : S.to, other = S.sheetFor === 'from' ? S.to : S.from;
+  var items = ST.map(function(s, i){ return {s:s, i:i}; }).filter(function(x){ return !nq || norm(x.s[0]).indexOf(nq) >= 0 || norm(x.s[1]).indexOf(nq) >= 0; });
+  $('stations').classList.toggle('filtering', !!nq);
+  $('stations').innerHTML = items.length ? items.map(function(x){
+    var mini = x.i === other ? (S.sheetFor === 'from' ? 'destino' : 'origen') : '';
+    return '<li><button type="button" data-st="' + x.i + '"' + (x.i === mine ? ' class="cur" aria-current="true"' : '') + '><span class="sdot" aria-hidden="true"></span>' + esc(x.s[0]) + (mini ? '<span class="mini">' + mini + '</span>' : '') + '</button></li>';
+  }).join('') : '<li class="msg" style="padding:12px 18px">No encontré esa estación.</li>';
+}
+
+/* ---------- anuncios ---------- */
+function setupAds(){
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('.ad'));
+  var preview = /[?&]anuncios\b/.test(location.search);
+  if (ADS_CLIENT){
+    var sc = document.createElement('script');
+    sc.async = true; sc.crossOrigin = 'anonymous';
+    sc.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(ADS_CLIENT);
+    document.head.appendChild(sc);
+    boxes.forEach(function(b){
+      var slot = ADS_SLOTS[b.getAttribute('data-slot')];
+      if (!slot) return;
+      b.hidden = false;
+      b.innerHTML = '<span class="ad-label">Publicidad</span><ins class="adsbygoogle" style="display:block" data-ad-client="' + esc(ADS_CLIENT) + '" data-ad-slot="' + esc(slot) + '" data-ad-format="auto" data-full-width-responsive="true"></ins>';
+      try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch(e){}
+    });
+  } else if (preview){
+    boxes.forEach(function(b){ b.hidden = false; b.innerHTML = '<span class="ad-label">Publicidad</span><div class="ad-ph">Espacio para anuncio</div>'; });
   }
 }
 
 /* ---------- eventos ---------- */
-function changed(){ S.pick = null; S._scrolled = false; store.set('urq.last', [S.from, S.to]); writeHash(); render(); }
-$('from').addEventListener('change', function(){ S.from = +this.value; changed(); });
-$('to').addEventListener('change', function(){ S.to = +this.value; changed(); });
+function changed(){ S.pick = null; S._scrolled = false; remember(); writeHash(); render(); }
+$('pickFrom').addEventListener('click', function(){ openSheet('from'); });
+$('pickTo').addEventListener('click', function(){ openSheet('to'); });
 $('swap').addEventListener('click', function(){ var t = S.from; S.from = S.to; S.to = t; changed(); });
-$('favs').addEventListener('click', function(e){
-  var b = e.target.closest('button'); if (!b) return;
-  if (b.id === 'favToggle'){
-    var i = favs.findIndex(function(f){ return f[0] === S.from && f[1] === S.to; });
-    if (i >= 0) favs.splice(i, 1); else if (S.from !== S.to) favs.push([S.from, S.to]);
-    store.set('urq.favs', favs); render(); return;
-  }
-  var f = favs[+b.getAttribute('data-fav')]; if (!f) return;
-  S.from = f[0]; S.to = f[1]; changed();
+$('sheetClose').addEventListener('click', closeSheet);
+$('sheet').addEventListener('click', function(e){
+  if (e.target === this){ closeSheet(); return; }
+  var b = e.target.closest('button[data-st]'); if (!b) return;
+  var st = +b.getAttribute('data-st');
+  if (S.sheetFor === 'from'){ if (st === S.to) S.to = S.from; S.from = st; }
+  else { if (st === S.from) S.from = S.to; S.to = st; }
+  closeSheet(); changed();
 });
+$('sheet').addEventListener('close', function(){ S.sheetFor = null; });
+$('search').addEventListener('input', function(){ fillStations(this.value); });
+$('search').addEventListener('keydown', function(e){
+  if (e.key === 'Enter'){ var b = $('stations').querySelector('button[data-st]'); if (b){ e.preventDefault(); b.click(); } }
+});
+$('recents').addEventListener('click', function(e){
+  var b = e.target.closest('button[data-r]'); if (!b) return;
+  var p = b.getAttribute('data-r').split('-'); S.from = +p[0]; S.to = +p[1]; changed();
+});
+$('whenBtn').addEventListener('click', function(){ S.whenOpen = !S.whenOpen; render(); });
 $('days').addEventListener('click', function(e){
   var b = e.target.closest('button[data-day]'); if (!b) return;
   S.day = b.getAttribute('data-day'); S.pick = null; S._scrolled = false; render();
@@ -613,21 +777,34 @@ $('at').addEventListener('change', function(){
   var v = this.value; if (!v) return;
   var p = v.split(':'); S.at = (+p[0]) * 60 + (+p[1]); S.pick = null; S._scrolled = false; render();
 });
-$('nowBtn').addEventListener('click', function(){ S.at = null; S.pick = null; render(); });
+$('nowBtn').addEventListener('click', function(){ S.at = null; S.day = 'hoy'; S.pick = null; render(); });
 $('moreBtn').addEventListener('click', function(){ S.showAll = !S.showAll; S._scrolled = false; render(); });
+$('lineBtn').addEventListener('click', function(){ S.fullLine = !S.fullLine; render(); });
 $('list').addEventListener('click', function(e){
   var b = e.target.closest('.trow'); if (!b) return;
   S.pick = b.getAttribute('data-k'); render();
-  if (window.matchMedia('(max-width: 899px)').matches){ try { $('tripTitle').scrollIntoView({behavior:'smooth', block:'start'}); } catch(err){} }
+  if (window.matchMedia('(max-width: 959px)').matches){ try { $('tripTitle').scrollIntoView({behavior:'smooth', block:'start'}); } catch(err){} }
+});
+$('shareBtn').addEventListener('click', function(){
+  var url = location.href.split('#')[0].split('?')[0] + routeHash();
+  var data = {title:'Tren Urquiza horarios', text:'Próximos trenes ' + ST[S.from][1] + ' → ' + ST[S.to][1], url:url};
+  function copy(){
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(function(){ toast('Link copiado'); }, function(){ toast(url); });
+    } else toast(url);
+  }
+  if (navigator.share){ navigator.share(data).catch(function(err){ if (!err || err.name !== 'AbortError') copy(); }); }
+  else copy();
 });
 window.addEventListener('hashchange', function(){ if (readHash()){ S.pick = null; render(); } });
-window.addEventListener('resize', function(){ render(); });
+var rt; window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(render, 150); });
+document.addEventListener('visibilitychange', function(){ if (!document.hidden) render(); });
 
-fillSelects();
 writeHash();
 render();
-render(); // segunda pasada para medir la altura real de las filas
-setInterval(function(){ if (S.at === null) render(); else $('clock').textContent = hhmm(Math.floor(nowBA().min)); }, 15000);
+render();
+setupAds();
+setInterval(function(){ if (S.at === null && !S.sheetFor) render(); }, 15000);
 })();
 </script>
 </body>
