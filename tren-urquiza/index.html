@@ -36,6 +36,7 @@
   --line:#0a8577;
   --line-soft:#dcefeb;
   --led:#ffb21c;
+  --warn:#985a00;
   --board:#0c1211;
   --board-ink:#c4d0cd;
   --font-body:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -113,6 +114,9 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .big .u{font-size:clamp(24px,6.4vw,30px);letter-spacing:0}
 .big.word .n{font-size:clamp(48px,13vw,64px)}
 .hero-line{font-size:18px;color:#fff;margin-top:6px}
+.recent{margin-top:10px;border:1px solid rgba(255,178,28,.45);background:rgba(255,178,28,.1);border-radius:10px;padding:8px 11px;font-size:15px;color:#fff}
+.recent b{color:var(--led)}
+.recent.old{border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:var(--board-ink)}
 .hero-line b{color:var(--led)}
 .hero-line .sep{color:var(--board-ink);padding:0 4px}
 .after{display:grid;gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed rgba(255,255,255,.18);font-size:15px}
@@ -137,8 +141,13 @@ ol.trains li:first-child .trow{border-top:0}
 .trow .ar{color:var(--muted)}
 .trow .arr{font-size:18px}
 .trow .dur{color:var(--muted);font-size:15px}
+.nw{white-space:nowrap}
 .trow .in{font-weight:700;font-size:15px;color:var(--line);text-align:right;white-space:nowrap}
 .trow.past{opacity:.45}
+.trow.recent .dep,.trow.recent .arr{color:var(--muted)}
+.trow.recent .in{color:var(--warn)}
+.trow.recent .in small{display:block;font-weight:400;font-size:12px}
+.trow.recent.old .in{color:var(--muted);font-weight:400}
 .trow.past .in{color:var(--muted);font-weight:400}
 .tag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border:1px solid var(--rule);border-radius:5px;padding:1px 5px;color:var(--muted);margin-left:6px;vertical-align:2px}
 .more{margin-top:8px;width:100%;padding:12px;border-radius:11px;border:1px solid var(--rule);background:var(--bg);font-weight:700}
@@ -267,6 +276,7 @@ dialog.sheet::backdrop{background:rgba(5,10,9,.55)}
       <div class="eyebrow"><span id="bKicker">Próximo tren</span><span class="r" id="bRoute"></span></div>
       <div class="big" id="bBig"><span class="n tab" id="bNum">--</span><span class="u" id="bUnit"></span></div>
       <div class="hero-line" id="bLine"></div>
+      <div class="recent" id="bRecent" hidden></div>
       <div class="after" id="bAfter"></div>
       <div class="note">El horario oficial puede variar ±3 minutos.</div>
     </section>
@@ -467,6 +477,7 @@ function untilTxt(diff){
   var h = Math.floor(m/60), r = m % 60;
   return 'en ' + h + ' h' + (r ? ' ' + pad(r) : '');
 }
+function agoMin(dep, ref){ return Math.max(1, Math.floor(ref - dep)); }
 function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function norm(s){ return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); }
 var store = {
@@ -561,6 +572,8 @@ function render(){
   var dayTrips = all.filter(function(x){ return x.off === 0; });
   var upcoming = all.filter(function(x){ return x.dep >= ctx.ref - 0.25; });
   var next = upcoming[0] || null, live = S.at === null;
+  var passed = live ? all.filter(function(x){ return x.dep < ctx.ref - 0.25 && x.dep >= ctx.ref - 10; }) : [];
+  var lastPassed = passed.length ? passed[passed.length - 1] : null;
 
   /* tablero */
   $('bRoute').textContent = ST[o][1] + ' → ' + ST[d][1];
@@ -594,6 +607,13 @@ function render(){
     $('bAfter').innerHTML = dayTrips.length ? '<span class="k">El primero</span><div class="chips"><span class="t tab">' + hhmm(dayTrips[0].dep) + '</span></div>' : '';
   }
 
+  var rec = $('bRecent');
+  if (lastPassed){
+    var ago = agoMin(lastPassed.dep, ctx.ref);
+    rec.hidden = false; rec.classList.toggle('old', ago > 3);
+    rec.innerHTML = 'El de las <b class="tab">' + hhmm(lastPassed.dep) + '</b> pasó hace ' + ago + ' min.' + (ago <= 3 ? ' Con el margen de ±3 min, quizás todavía está.' : '');
+  } else rec.hidden = true;
+
   /* datos rápidos */
   var durs = dayTrips.map(function(x){ return x.dur; });
   var dmin = Math.min.apply(null, durs), dmax = Math.max.apply(null, durs);
@@ -606,18 +626,21 @@ function render(){
   /* lista */
   var list;
   if (S.showAll){ list = dayTrips.slice(); $('listTitle').textContent = 'Todos · ' + DAYNAME[ctx.type]; $('moreBtn').textContent = 'Ver solo los próximos'; }
-  else { list = upcoming.slice(0, 8); $('listTitle').textContent = 'Siguientes trenes'; $('moreBtn').textContent = 'Ver todos los del día'; }
+  else { list = (lastPassed ? [lastPassed] : []).concat(upcoming.slice(0, 8)); $('listTitle').textContent = 'Siguientes trenes'; $('moreBtn').textContent = 'Ver todos los del día'; }
   var sel = null;
   if (S.pick) sel = all.filter(function(x){ return x.tr.id + ':' + x.off === S.pick; })[0] || null;
   if (!sel){ sel = next; S.pick = null; }
   var selKey = sel ? sel.tr.id + ':' + sel.off : '';
   $('list').innerHTML = list.length ? list.map(function(x){
-    var k = x.tr.id + ':' + x.off, past = x.dep < ctx.ref - 0.25;
-    var inTxt = past ? 'ya salió' : (live ? untilTxt(x.dep - ctx.ref) : '');
-    return '<li><button type="button" class="trow' + (past && S.showAll ? ' past' : '') + '" data-k="' + k + '" aria-current="' + (k === selKey) + '">' +
+    var k = x.tr.id + ':' + x.off, past = x.dep < ctx.ref - 0.25, ago = past ? agoMin(x.dep, ctx.ref) : 0;
+    var isRecent = past && live && ago <= 10;
+    var inHtml = !past ? esc(live ? untilTxt(x.dep - ctx.ref) : '') :
+      isRecent ? 'pasó hace ' + ago + ' min' + (ago <= 3 ? '<small>quizás todavía está</small>' : '') : 'ya pasó';
+    var cls = isRecent ? ' recent' + (ago > 3 ? ' old' : '') : (past && S.showAll ? ' past' : '');
+    return '<li><button type="button" class="trow' + cls + '" data-k="' + k + '" aria-current="' + (k === selKey) + '">' +
       '<span class="dep tab">' + hhmm(x.dep) + '</span><span class="ar">→</span><span class="arr tab">' + hhmm(x.arr) + '</span>' +
-      '<span class="dur">' + x.dur + ' min' + (x.tag ? '<span class="tag">' + esc(x.tag) + '</span>' : '') + '</span>' +
-      '<span class="in">' + esc(inTxt) + '</span></button></li>';
+      '<span class="dur"><span class="nw">' + x.dur + ' min</span>' + (x.tag ? '<span class="tag">' + esc(x.tag) + '</span>' : '') + '</span>' +
+      '<span class="in">' + inHtml + '</span></button></li>';
   }).join('') : '<li class="msg">No hay trenes para mostrar.</li>';
   if (S.showAll && !S._scrolled){
     S._scrolled = true;
