@@ -185,6 +185,27 @@ ol.trains li:first-child .trow{border-top:0}
 .lg-same{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid var(--carbon);display:inline-block}
 .lg-opp{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:9px solid var(--riel);display:inline-block}
 
+/* ubicación, modo llegada, sin conexión */
+.locate{display:inline-flex;align-items:center;gap:6px;margin-top:4px;font-size:15px}
+.locate svg{width:16px;height:16px}
+.offline{margin:8px 0 0;font-size:14px;font-weight:600;color:var(--mostaza-texto)}
+.timerow select,.alarma select{padding:6px 8px;border-radius:8px;border:1.5px solid var(--carbon);background:transparent;font-weight:700;font-size:15px}
+
+/* aviso antes de que salga */
+.alarma{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:0 20px 12px;font-size:15px;font-weight:600}
+.alarma .chipbtn{border:0;background:var(--carbon);color:#fff;border-radius:8px;padding:7px 12px;font-weight:700;font-size:15px}
+.alarma .linkbtn{color:var(--carbon)}
+.alarm-pop{position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:60;max-width:520px;margin:0 auto;background:var(--carbon);color:#fff;border:3px solid var(--mostaza);border-radius:18px;padding:16px 18px;box-shadow:0 12px 40px rgba(34,41,43,.35);display:grid;gap:8px}
+.alarm-pop h3{font-size:24px;font-weight:850;font-stretch:80%;color:var(--mostaza)}
+.alarm-pop p{margin:0;font-size:16px}
+.alarm-pop button{justify-self:start;border:0;background:var(--mostaza);color:var(--carbon);border-radius:10px;padding:10px 18px;font-weight:700;font-size:16px}
+
+/* datos de estación */
+.estinfo{margin-top:14px;padding-top:12px;border-top:1px solid var(--junta);display:grid;gap:8px;font-size:15px}
+.estinfo p{margin:0}
+.stations .dist{margin-left:auto;font-size:13px;color:var(--riel)}
+.stations .mini + .dist{margin-left:10px}
+
 /* avisos de Metrovías */
 .avisos-h{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .sec-h.sm{font-size:19px}
@@ -278,6 +299,10 @@ dialog.sheet::backdrop{background:rgba(34,41,43,.5)}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4v15M4 8l4-4 4 4M16 20V5M12 16l4 4 4-4"/></svg>
         </button>
       </div>
+      <button class="linkbtn locate" id="locateBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        Usar la estación más cercana
+      </button>
       <div class="when">
         <span id="whenTxt"></span>
         <button class="linkbtn" id="whenBtn" type="button" aria-expanded="false" aria-controls="whenPanel" aria-label="Cambiar día u hora">Cambiar</button>
@@ -285,11 +310,15 @@ dialog.sheet::backdrop{background:rgba(34,41,43,.5)}
       <div class="when-panel" id="whenPanel" hidden>
         <div class="seg" id="days" role="group" aria-label="Qué horario usar"></div>
         <div class="timerow">
-          <label for="at">Salgo a las</label>
-          <input type="time" id="at" class="tab">
+          <select id="modeSel" aria-label="Elegir si es hora de salida o de llegada">
+            <option value="salgo">Salgo a las</option>
+            <option value="llego">Llego a las</option>
+          </select>
+          <input type="time" id="at" class="tab" aria-label="Hora">
           <button type="button" class="linkbtn" id="nowBtn">Volver a ahora</button>
         </div>
       </div>
+      <p class="offline" id="offlineNote" hidden>Sin conexión: los horarios funcionan igual.</p>
       <div class="recents" id="recents" hidden></div>
     </section>
 
@@ -304,6 +333,7 @@ dialog.sheet::backdrop{background:rgba(34,41,43,.5)}
           <dt>Viaje</dt><dd id="bDur"></dd>
         </dl>
       </div>
+      <div class="alarma" id="bAlarm"></div>
       <div class="franja"></div>
       <div class="despues" id="bAfter"></div>
       <div class="recent" id="bRecent" hidden></div>
@@ -356,6 +386,7 @@ dialog.sheet::backdrop{background:rgba(34,41,43,.5)}
         <span><i class="lg-opp"></i>en sentido contrario</span>
       </div>
       <button class="more" id="lineBtn" type="button">Ver toda la línea</button>
+      <div class="estinfo" id="stInfo"></div>
     </section>
   </div>
 
@@ -443,6 +474,11 @@ dialog.sheet::backdrop{background:rgba(34,41,43,.5)}
   </div>
 </dialog>
 <div class="toast" id="toast" role="status" hidden></div>
+<div class="alarm-pop" id="alarmPop" role="alertdialog" aria-labelledby="alarmTitle" hidden>
+  <h3 id="alarmTitle">Tu tren sale en 5 min</h3>
+  <p id="alarmText"></p>
+  <button type="button" id="alarmOk">Listo</button>
+</div>
 
 <script id="data" type="application/json">{"habil":{"L":["60|3222222222322141322223","160|3222222222322141322223","215|3222222222322141322223","260|3222222222222141322223","275|3222222222222141322223","300|3222222222222141322223","314|3222222222222141322223","324|3222222222222141322223","334|3222222222222141322223","344|3222222222222141322223","354|3222222222222141322223","364|3222222222322141222223","374|3222222222322141222223","383|3222222222322141222223","391|3222222222322141222223","399|3222222222322141222223","407|3222222222322141222223","415|3222222222322141222223","423|3222222222322141222223","431|3222222222322141222223","439|3222222222322141222223","447|3222222222322141222223","455|3222222222322141222223","467|3222222222322141222223","477|3222222222322141222223","487|3222222222322141222223","497|3222222222322141222223","507|3222222222322141222223","517|3222222222322141222223","527|3222222222322141222223","537|3222222222322141222223","547|3222222222322141222223","562|3222222222322141222223","579|3222222222322141222223","599|3222222222322141222223","615|3222222222322141222223","630|3222222222322141222223","645|3222222222322141222223","660|3222222222322141222223","675|3222222222322141222223","690|3222222222322141222223","705|3222222222322141222223","720|3222222222322141222223","735|3222222222322141222223","750|3222222222322141222223","765|3222222222322141222223","780|3222222222322141222223","795|3222222222322141222223","810|3222222222322141222223","825|3222222222322141222223","840|3222222222322141222223","855|3222222222322141222223","870|3222222222322141222223","885|3222222222322141222223","900|3222222222322141222223","915|3222222222322141222223","930|3222222222322141222223","945|3222222222322141222223","960|3222222222322141322223","975|3222222222322141322223","990|3222222222322141322223","1005|3222222222322141322223","1020|3222222222322141322223","1030|3222222222322141322223","1040|3222222222322141322223","1050|3222222222322141322223","1060|3222222222322141322223","1070|3222222222322141322223","1080|3222222222322141322223","1090|3222222222322141322223","1100|3222222222322141322223","1110|3222222222322141322223","1120|3222222222322141322223","1130|3222222222322141322223","1140|3222222222322141322223","1150|3222222222322141322223","1160|3222222222322141322223","1170|3222222222322141322223","1180|3222222222322141322223","1190|3222222222322141322223","1200|3222222222322141322223","1215|3222222222322141322223","1230|3222222222322141322223","1245|3222222222322141322223","1260|3222222222322141322223","1280|3222222222322141322223","1300|3222222222322141322223","1320|3222222222322141322223","1340|3222222222322141322223","1360|3222222222322141322223","1386|3222222222322141322223","1430|3222222222322141322223"],"C":["60|2212232422232222211325","150|2212232422232222211325","225|2212232422232222211325","270|2212232422232222211325","285|2212232422232222211325","300|2212232422332222211325","315|2212232422332222211325","330|2212232422332222211325","340|2212232422332222211325","351|2212232422332222211325","361|2212232422332222221325","371|2212232422332222221325","381|2212232422332222221325","391|2212232422332222221325","400|2212232422332222221325","408|2212232422332222221325","418|2212232422332222221325","428|2212232422332222221325","438|2212232422332222221325","446|2212232422332222221325","454|2212232422332222221325","462|2212232422332222221325","470|2212232422332222221325","478|2212232422332222221325","486|2212232422332222221325","494|2212232422332222221325","502|2212232422332222221325","509|2212232422332222221325","519|2212232422332222221325","529|2212232422332222221325","539|2212232422332222221325","549|2212232422332222221325","559|2212232422332222221325","569|2212232422332222221325","579|2212232422332222221325","589|2212232422332222221325","599|2212232422332222221325","614|2212232422332222221325","631|2212232422332222221325","651|2212232422332222221325","667|2212232422332222221325","682|2212232422332222221325","697|2212232422332222211325","712|2212232422332222211325","727|2212232422332222221325","742|2212232422332222211325","757|2212232422332222211325","772|2212232422332222211325","787|2212232422332222221325","802|2212232422332222211325","817|2212232422332222211325","832|2212232422332222211325","847|2212232422332222221325","862|2212232422332222211325","877|2212232422332222211325","892|2212232422332222211325","907|2212232422332222221325","922|2212232422332222211325","937|2212232422332222211325","952|2212232422332222211325","967|2212232422332222221325","982|2212232422332222211325","997|2212232422332222211325","1013|2212232422332222211325","1028|2212232422332222211325","1043|2212232422332222211325","1058|2212232422332222211325","1073|2212232422332222211325","1083|2212232422332222211325","1093|2212232422332222211325","1103|2212232422332222211325","1113|2212232422332222211325","1123|2212232422332222211325","1133|2212232422332222211325","1143|2212232422332222211325","1153|2212232422332222211325","1163|2212232422332222211325","1173|2212232422332222211325","1183|2212232422332222211325","1193|2212232422332222211325","1203|2212232422332222211325","1213|2212232422332222211325","1223|2212232422332222211325","1243|2212232422232222211325","1263|2212232422232222211325","1283|2212232422232222211325","1301|2212232422232222211325","1321|2212232422232222211325","1333|2212232422232222211325","1353|2212232422232222211325","1373|2212232422232222211325","1401|2212232422232222211325","1439|2212232422232222211325"]},"sabado":{"L":["60|3222222222222141222223","160|3222222222222141222223","215|3222222222222141222223","280|3222222222222141222223","300|3222222222322141222223","320|3222222222322141222223","340|3222222222322141222223","360|3222222222322141222223","375|3222222222322141222223","390|3222222222322141222223","405|3222222222322141222223","420|3222222222322141222223","435|3222222222322141222223","450|3222222222322141222223","465|3222222222322141222223","480|3222222222322141222223","495|3222222222322141222223","510|3222222222322141222223","525|3222222222322141222223","540|3222222222322141222223","555|3222222222322141222223","570|3222222222322141222223","585|3222222222322141222223","600|3222222222322141222223","615|3222222222322141222223","630|3222222222322141222223","645|3222222222322141222223","660|3222222222322141222223","675|3222222222322141222223","690|3222222222322141222223","705|3222222222322141222223","720|3222222222322141222223","740|3222222222322141222223","760|3222222222322141222223","780|3222222222322141222223","800|3222222222322141222223","820|3222222222322141222223","840|3222222222322141222223","860|3222222222322141222223","880|3222222222322141222223","900|3222222222322141222223","920|3222222222322141222223","940|3222222222322141222223","960|3222222222322141222223","980|3222222222322141222223","1000|3222222222322141222223","1020|3222222222322141222223","1040|3222222222322141222223","1060|3222222222322141222223","1080|3222222222322141222223","1100|3222222222322141222223","1120|3222222222322141222223","1140|3222222222322141222223","1160|3222222222322141222223","1180|3222222222322141222223","1200|3222222222322141222223","1223|3222222222322141222223","1253|3222222222322141222223","1283|3222222222322141222223","1313|3222222222322141222223","1343|3222222222322141222223","1373|3222222222322141222223","1391|3222222222322141222223","1430|3222222222322141222223"],"C":["60|2212232422232222211325","150|2212232422232222211325","225|2212232422232222211325","270|2212232422232222211325","300|2212232422332222211325","330|2212232422332222211325","352|2212232422332222211325","372|2212232422332222211325","392|2212232422332222211325","412|2212232422332222211325","427|2212232422332222211325","442|2212232422332222211325","457|2212232422332222211325","472|2212232422332222211325","487|2212232422332222211325","502|2212232422332222211325","517|2212232422332222211325","532|2212232422332222211325","547|2212232422332222211325","562|2212232422332222211325","577|2212232422332222211325","592|2212232422332222211325","607|2212232422332222211325","622|2212232422332222211325","637|2212232422332222211325","652|2212232422332222211325","667|2212232422332222211325","682|2212232422332222211325","697|2212232422332222211325","712|2212232422332222211325","727|2212232422332222211325","742|2212232422332222211325","757|2212232422332222211325","772|2212232422332222211325","792|2212232422332222211325","812|2212232422332222211325","832|2212232422332222211325","852|2212232422332222211325","872|2212232422332222211325","892|2212232422332222211325","912|2212232422332222211325","932|2212232422332222211325","952|2212232422332222211325","972|2212232422332222211325","992|2212232422332222211325","1012|2212232422332222211325","1032|2212232422332222211325","1052|2212232422332222211325","1072|2212232422332222211325","1092|2212232422332222211325","1112|2212232422332222211325","1132|2212232422332222211325","1152|2212232422332222211325","1172|2212232422332222211325","1192|2212232422332222211325","1212|2212232422332222211325","1232|2212232422332222211325","1252|2212232422332222211325","1288|2212232422332222211325","1308|2212232422332222211325","1338|2212232422332222211325","1368|2212232422332222211325","1398|2212232422332222211325","1428|2212232422332222211325"]},"domingo":{"L":["60|3222222222322141222223","265|3222222222322141222223","315|3222222222322141222223","360|3222222222322141222223","390|3222222222322141222223","420|3222222222322141222223","450|3222222222322141222223","480|3222222222322141222223","510|3222222222322141222223","540|3222222222322141222223","570|3222222222322141222223","600|3222222222322141222223","630|3222222222322141222223","660|3222222222322141222223","690|3222222222322141222223","720|3222222222322141222223","750|3222222222322141222223","780|3222222222322141222223","810|3222222222322141222223","840|3222222222322141222223","870|3222222222322141222223","900|3222222222322141222223","930|3222222222322141222223","960|3222222222322141222223","990|3222222222322141222223","1020|3222222222322141222223","1050|3222222222322141222223","1080|3222222222322141222223","1110|3222222222322141222223","1140|3222222222322141222223","1170|3222222222322141222223","1200|3222222222322141222223","1230|3222222222322141222223","1260|3222222222322141222223","1290|3222222222322141222223","1320|3222222222322141222223","1360|3222222222322141222223","1430|3222222222322141222223"],"C":["1|2212232422332222211325","192|2212232422332222211325","255|2212232422332222211325","330|2212232422332222211325","380|2212232422332222211325","415|2212232422332222211325","445|2212232422332222211325","475|2212232422332222211325","505|2212232422332222211325","535|2212232422332222211325","565|2212232422332222211325","595|2212232422332222211325","625|2212232422332222211325","655|2212232422332222211325","685|2212232422332222211325","715|2212232422332222211325","745|2212232422332222211325","775|2212232422332222211325","805|2212232422332222211325","835|2212232422332222211325","865|2212232422332222211325","895|2212232422332222211325","925|2212232422332222211325","955|2212232422332222211325","985|2212232422332222211325","1015|2212232422332222211325","1045|2212232422332222211325","1075|2212232422332222211325","1105|2212232422332222211325","1135|2212232422332222211325","1165|2212232422332222211325","1195|2212232422332222211325","1225|2212232422332222211325","1255|2212232422332222211325","1285|2212232422332222211325","1315|2212232422332222211325","1345|2212232422332222211325","1375|2212232422332222211325","1415|2212232422332222211325"]},"flags":{"noFeriado":{"domingo":{"C":[0]}}}}</script>
 <script>
@@ -457,6 +493,10 @@ dialog.sheet::backdrop{background:rgba(34,41,43,.5)}
 var ADS_CLIENT = "";
 var ADS_SLOTS = { medio:"", final:"" };
 
+/* ===== CONTADOR DE VISITAS =====
+   Cloudflare Web Analytics (gratis, sin cookies). Pegar acá el token que da Cloudflare. */
+var CF_ANALYTICS_TOKEN = "";
+
 var RAW = JSON.parse(document.getElementById('data').textContent);
 var ST = [
   ["Federico Lacroze","Lacroze","lacroze"],["José Artigas","Artigas","artigas"],["Pedro N. Arata","Arata","arata"],
@@ -469,6 +509,25 @@ var ST = [
   ["Campo de Mayo","Campo de Mayo","campodemayo"],["Sargento Cabral","Sgto. Cabral","cabral"],["General Lemos","Lemos","lemos"]
 ];
 var N = ST.length;
+/* Ubicación de cada estación (Ministerio de Transporte, datos abiertos). Lynch y Bosch: calculadas sobre la vía según su kilómetro. */
+var COORDS = [[-34.586715,-58.455586],[-34.590031,-58.466273],[-34.592420,-58.474807],[-34.593146,-58.494176],[-34.594331,-58.502336],
+  [-34.595597,-58.510477],[-34.5960,-58.5240],[-34.595587,-58.535161],[-34.593833,-58.546748],[-34.591953,-58.559179],
+  [-34.590763,-58.571800],[-34.588979,-58.590732],[-34.588320,-58.608154],[-34.587821,-58.621874],[-34.587484,-58.631454],
+  [-34.579816,-58.640471],[-34.573531,-58.645364],[-34.562450,-58.660275],[-34.555573,-58.669500],[-34.5488,-58.678850],
+  [-34.543701,-58.685902],[-34.537187,-58.694932],[-34.532911,-58.700836]];
+var STINFO = {
+  0: 'Combina con el Subte B y con el Centro de Trasbordo Federico Lacroze, que tiene unas 20 líneas de colectivos y Ecobici.',
+  3: 'Combina con el Metrobús.',
+  4: 'Combina con el Metrobús.'
+};
+function mapsUrl(st){ return 'https://www.google.com/maps/search/?api=1&query=' + COORDS[st][0] + ',' + COORDS[st][1]; }
+function distKm(a, b){
+  var R = 6371, r = Math.PI/180, dLat = (b[0]-a[0])*r, dLng = (b[1]-a[1])*r;
+  var h = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return 2*R*Math.asin(Math.sqrt(h));
+}
+function fmtDist(km){ return km < 1 ? (Math.round(km*100)*10) + ' m' : km.toFixed(1).replace('.', ',') + ' km'; }
+var POS = null;
 var DAYNAME = {habil:"Hábil", sabado:"Sábado", domingo:"Domingo", feriado:"Feriado"};
 var DAYLONG = {habil:"día hábil", sabado:"sábado", domingo:"domingo", feriado:"feriado"};
 
@@ -545,10 +604,11 @@ var toastTimer;
 function toast(t){ var el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(function(){ el.hidden = true; }, 2600); }
 
 /* ---------- estado ---------- */
-var S = { from:11, to:0, day:'hoy', at:null, showAll:false, pick:null, fullLine:false, sheetFor:null, whenOpen:false };
+var S = { from:11, to:0, day:'hoy', at:null, mode:'salgo', showAll:false, pick:null, fullLine:false, sheetFor:null, whenOpen:false };
 var recents = store.get('urq.recent', null);
 if (!recents){ recents = store.get('urq.favs', []); }
 recents = (recents || []).filter(function(r){ return r && r.length === 2 && r[0] !== r[1] && r[0] >= 0 && r[0] < N && r[1] >= 0 && r[1] < N; }).slice(0, 5);
+S.lead = store.get('urq.lead', 5);
 var last = store.get('urq.last', null);
 if (last && last.length === 2 && last[0] !== last[1]) { S.from = last[0]; S.to = last[1]; }
 readHash();
@@ -610,7 +670,9 @@ function renderPicker(ctx){
   }).join('') : '';
   var todayType = typeOf(ctx.today);
   var label = ctx.auto ? 'Hoy, ' + DAYLONG[todayType] : 'Horario de ' + DAYLONG[ctx.type];
-  $('whenTxt').innerHTML = '<b>' + esc(label) + '</b>, ' + (S.at === null ? hhmm(Math.floor(ctx.now.min)) : 'desde las ' + hhmm(S.at));
+  var timeTxt = S.at === null ? hhmm(Math.floor(ctx.now.min)) : (S.mode === 'llego' ? 'llegar antes de las ' : 'desde las ') + hhmm(S.at);
+  $('whenTxt').innerHTML = '<b>' + esc(label) + '</b>, ' + timeTxt;
+  $('modeSel').value = S.mode;
   $('whenBtn').textContent = S.whenOpen ? 'Listo' : 'Cambiar';
   $('whenBtn').setAttribute('aria-expanded', String(S.whenOpen));
   $('whenPanel').hidden = !S.whenOpen;
@@ -618,6 +680,68 @@ function renderPicker(ctx){
   $('days').innerHTML = days.map(function(d){ return '<button type="button" data-day="' + d[0] + '" aria-pressed="' + (S.day === d[0]) + '">' + esc(d[1]) + '</button>'; }).join('');
   if (document.activeElement !== $('at')) $('at').value = hhmm(ctx.ref);
   $('nowBtn').hidden = S.at === null;
+}
+
+function rowHtml(x, ctx, selKey, live, target){
+  var k = x.tr.id + ':' + x.off, past = x.dep < ctx.ref - 0.25, ago = past ? agoMin(x.dep, ctx.ref) : 0;
+  var isRecent = past && live && ago <= 10, inHtml, cls = '';
+  if (target !== undefined){
+    var spare = Math.round(target - x.arr);
+    inHtml = spare <= 0 ? 'llegás justo' : 'llegás ' + spare + ' min antes';
+  } else {
+    inHtml = !past ? esc(live ? untilTxt(x.dep - ctx.ref) : '') :
+      isRecent ? 'pasó hace ' + ago + ' min' + (ago <= 3 ? '<small>quizás todavía está</small>' : '') : 'ya pasó';
+    cls = isRecent ? ' recent' + (ago > 3 ? ' old' : '') : (past && S.showAll ? ' past' : '');
+  }
+  return '<li><button type="button" class="trow' + cls + '" data-k="' + k + '" aria-current="' + (k === selKey) + '">' +
+    '<span class="dep tab">' + hhmm(x.dep) + '</span><span class="ar">→</span><span class="arr tab">' + hhmm(x.arr) + '</span>' +
+    '<span class="dur"><span class="nw">' + x.dur + ' min</span>' + (x.tag ? ' <span class="tag">' + esc(x.tag) + '</span>' : '') + '</span>' +
+    '<span class="in">' + inHtml + '</span></button></li>';
+}
+function setFacts(dayTrips, upcoming){
+  var durs = dayTrips.map(function(x){ return x.dur; });
+  var dmin = Math.min.apply(null, durs), dmax = Math.max.apply(null, durs);
+  var gaps = [];
+  for (var i = 1; i < Math.min(upcoming.length, 6); i++) gaps.push(Math.round(upcoming[i].dep - upcoming[i-1].dep));
+  var f = durs.length ? 'Tarda ' + (dmin === dmax ? dmin : dmin + ' a ' + dmax) + ' min' : '';
+  if (gaps.length >= 2 && Math.max.apply(null, gaps) <= 60){ var g1 = Math.min.apply(null, gaps), g2 = Math.max.apply(null, gaps); f += ', pasa cada ' + (g1 === g2 ? g1 : g1 + ' a ' + g2) + ' min'; }
+  $('facts').textContent = f;
+}
+function renderArrive(ctx, all, dayTrips, o, d){
+  var target = S.at, big = $('bBig');
+  var ok = all.filter(function(x){ return x.off <= 0 && x.arr <= target + 0.01; });
+  var best = ok.length ? ok[ok.length - 1] : null;
+  var dirTerm = o < d ? N-1 : 0;
+  $('bDest').innerHTML = 'Tren a ' + esc(ST[dirTerm][0]);
+  $('bArrLab').textContent = 'Llega a ' + ST[d][1];
+  $('bRecent').hidden = true;
+  if (best){
+    $('bLead').textContent = 'Para llegar a ' + ST[d][1] + ' antes de las ' + hhmm(target) + ', salí de ' + ST[o][1] + ' a las';
+    big.classList.remove('word');
+    $('bNum').textContent = hhmm(best.dep); $('bUnit').textContent = '';
+    $('bDatos').hidden = false;
+    $('bDep').textContent = hhmm(best.dep); $('bArr').textContent = hhmm(best.arr); $('bDur').textContent = best.dur + ' min';
+    var earlier = ok.slice(-3, -1).reverse();
+    $('bAfter').hidden = earlier.length === 0;
+    $('bAfter').innerHTML = '<span class="k">Más temprano</span>' + earlier.map(function(x){
+      return '<span class="t tab">' + hhmm(x.dep) + '<small>llega ' + hhmm(x.arr) + '</small></span>';
+    }).join('');
+  } else {
+    big.classList.add('word');
+    $('bLead').textContent = 'No hay trenes que lleguen a ' + ST[d][1] + ' antes de las ' + hhmm(target) + ' ese ' + DAYLONG[ctx.type] + '.';
+    $('bNum').textContent = 'Sin trenes'; $('bUnit').textContent = '';
+    $('bDatos').hidden = true; $('bAfter').hidden = true;
+  }
+  setFacts(dayTrips, []);
+  var list;
+  if (S.showAll){ list = dayTrips.slice(); $('listTitle').textContent = 'Todos los trenes del ' + DAYLONG[ctx.type]; $('moreBtn').textContent = 'Ver solo los que sirven'; }
+  else { list = ok.slice(-6); $('listTitle').textContent = 'Llegan antes de las ' + hhmm(target); $('moreBtn').textContent = 'Ver todos los del día'; }
+  var sel = null;
+  if (S.pick) sel = all.filter(function(x){ return x.tr.id + ':' + x.off === S.pick; })[0] || null;
+  if (!sel){ sel = best; S.pick = null; }
+  var selKey = sel ? sel.tr.id + ':' + sel.off : '';
+  $('list').innerHTML = list.length ? list.map(function(x){ return rowHtml(x, ctx, selKey, false, S.showAll ? undefined : target); }).join('') : '<li class="msg">No hay trenes para mostrar.</li>';
+  return {sel:sel, hero:best};
 }
 
 var lastBoardKey = '';
@@ -630,6 +754,13 @@ function render(){
   var next = upcoming[0] || null, live = S.at === null;
   var passed = live ? all.filter(function(x){ return x.dep < ctx.ref - 0.25 && x.dep >= ctx.ref - 10; }) : [];
   var lastPassed = passed.length ? passed[passed.length - 1] : null;
+
+  if (S.mode === 'llego' && S.at !== null){
+    var ra = renderArrive(ctx, all, dayTrips, o, d);
+    renderTrip(ctx, ra.sel, o, d);
+    renderAlarm(ctx, ra.hero, ra.sel, o, d);
+    return;
+  }
 
   /* tablero */
   var dirTerm = o < d ? N-1 : 0;
@@ -671,13 +802,7 @@ function render(){
   } else rec.hidden = true;
 
   /* datos rápidos */
-  var durs = dayTrips.map(function(x){ return x.dur; });
-  var dmin = Math.min.apply(null, durs), dmax = Math.max.apply(null, durs);
-  var gaps = [];
-  for (var i = 1; i < Math.min(upcoming.length, 6); i++) gaps.push(Math.round(upcoming[i].dep - upcoming[i-1].dep));
-  var f = 'Tarda ' + (dmin === dmax ? dmin : dmin + ' a ' + dmax) + ' min';
-  if (gaps.length >= 2 && Math.max.apply(null, gaps) <= 60){ var g1 = Math.min.apply(null, gaps), g2 = Math.max.apply(null, gaps); f += ', pasa cada ' + (g1 === g2 ? g1 : g1 + ' a ' + g2) + ' min'; }
-  $('facts').textContent = f;
+  setFacts(dayTrips, upcoming);
 
   /* lista */
   var list;
@@ -687,23 +812,86 @@ function render(){
   if (S.pick) sel = all.filter(function(x){ return x.tr.id + ':' + x.off === S.pick; })[0] || null;
   if (!sel){ sel = next; S.pick = null; }
   var selKey = sel ? sel.tr.id + ':' + sel.off : '';
-  $('list').innerHTML = list.length ? list.map(function(x){
-    var k = x.tr.id + ':' + x.off, past = x.dep < ctx.ref - 0.25, ago = past ? agoMin(x.dep, ctx.ref) : 0;
-    var isRecent = past && live && ago <= 10;
-    var inHtml = !past ? esc(live ? untilTxt(x.dep - ctx.ref) : '') :
-      isRecent ? 'pasó hace ' + ago + ' min' + (ago <= 3 ? '<small>quizás todavía está</small>' : '') : 'ya pasó';
-    var cls = isRecent ? ' recent' + (ago > 3 ? ' old' : '') : (past && S.showAll ? ' past' : '');
-    return '<li><button type="button" class="trow' + cls + '" data-k="' + k + '" aria-current="' + (k === selKey) + '">' +
-      '<span class="dep tab">' + hhmm(x.dep) + '</span><span class="ar">→</span><span class="arr tab">' + hhmm(x.arr) + '</span>' +
-      '<span class="dur"><span class="nw">' + x.dur + ' min</span>' + (x.tag ? ' <span class="tag">' + esc(x.tag) + '</span>' : '') + '</span>' +
-      '<span class="in">' + inHtml + '</span></button></li>';
-  }).join('') : '<li class="msg">No hay trenes para mostrar.</li>';
+  $('list').innerHTML = list.length ? list.map(function(x){ return rowHtml(x, ctx, selKey, live); }).join('') : '<li class="msg">No hay trenes para mostrar.</li>';
   if (S.showAll && !S._scrolled){
     S._scrolled = true;
     var cur = $('list').querySelector('.trow:not(.past)');
     if (cur && cur.parentNode.previousElementSibling) cur.parentNode.previousElementSibling.scrollIntoView({block:'nearest'});
   }
   renderTrip(ctx, sel, o, d);
+  renderAlarm(ctx, next, sel, o, d);
+}
+
+/* ---------- aviso antes de que salga ---------- */
+function tripLabel(x, o, d){ return 'tren de las ' + hhmm(x.dep) + ' de ' + ST[o][1] + ' a ' + ST[d][1]; }
+function alarmable(ctx, x){ return ctx.auto && x && (x.dep - ctx.now.min) > 1; }
+var lastAlarmHtml = '', lastInfoHtml = '';
+function renderAlarm(ctx, hero, sel, o, d){
+  var a = store.get('urq.alarm', null), html = '';
+  if (a && Date.now() < a.ts + 2*60000){
+    html = '<span>Te aviso a las <b class="tab">' + hhmm(a.depMin - a.lead) + '</b>, ' + a.lead + ' min antes del ' + esc(a.label) + '. Dejá la página abierta.</span> <button type="button" class="linkbtn" data-alarm="off">Cancelar aviso</button>';
+  } else if (alarmable(ctx, hero)){
+    html = '<label for="leadSel">Avisarme</label> <select id="leadSel">' + [2,5,10,15].map(function(m){ return '<option value="' + m + '"' + (m === S.lead ? ' selected' : '') + '>' + m + '</option>'; }).join('') +
+      '</select> <span>min antes</span> <button type="button" class="chipbtn" data-alarm="hero">Activar aviso</button>';
+  }
+  if (html !== lastAlarmHtml){ $('bAlarm').innerHTML = html; lastAlarmHtml = html; }
+  $('bAlarm').hidden = !html;
+  S._hero = hero; S._sel = sel;
+  var info = '';
+  if (!a && sel && hero && sel !== hero && alarmable(ctx, sel)){
+    info += '<p><button type="button" class="linkbtn" data-alarm="sel">Avisarme ' + S.lead + ' min antes de que salga el de las ' + hhmm(sel.dep) + '</button></p>';
+  }
+  [o, d].forEach(function(st){
+    info += '<p><b>' + esc(ST[st][0]) + '</b>' + (POS ? ', a ' + fmtDist(distKm([POS.lat, POS.lng], COORDS[st])) + ' de vos' : '') + '. ' +
+      (STINFO[st] ? esc(STINFO[st]) + ' ' : '') + '<a href="' + mapsUrl(st) + '" target="_blank" rel="noopener">Ver en el mapa</a></p>';
+  });
+  if (info !== lastInfoHtml){ $('stInfo').innerHTML = info; lastInfoHtml = info; }
+}
+var AC = null;
+function unlockAudio(){ try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); } catch(e){} }
+function beep(){
+  if (!AC) return;
+  try {
+    var t = AC.currentTime;
+    [0, 0.45, 0.9].forEach(function(dl){
+      var os = AC.createOscillator(), g = AC.createGain();
+      os.type = 'sine'; os.frequency.value = 880;
+      g.gain.setValueAtTime(0.0001, t + dl); g.gain.exponentialRampToValueAtTime(0.4, t + dl + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + dl + 0.35);
+      os.connect(g); g.connect(AC.destination); os.start(t + dl); os.stop(t + dl + 0.4);
+    });
+  } catch(e){}
+}
+function setAlarm(x){
+  var ctx = context();
+  if (!alarmable(ctx, x)) return;
+  unlockAudio();
+  var ts = Date.now() + (x.dep - ctx.now.min) * 60000;
+  store.set('urq.alarm', {ts:ts, depMin:x.dep, lead:S.lead, label:tripLabel(x, S.from, S.to), fired:false});
+  try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch(e){}
+  toast('Listo: te aviso ' + S.lead + ' min antes. Dejá la página abierta.');
+  render();
+}
+function clearAlarm(){ store.set('urq.alarm', null); $('alarmPop').hidden = true; render(); }
+function fireAlarm(a){
+  var mins = Math.max(0, Math.floor((a.ts - Date.now()) / 60000));
+  var title = mins <= 0 ? 'Tu tren está saliendo' : 'Tu tren sale en ' + mins + ' min';
+  var body = 'Es el ' + a.label + '.';
+  $('alarmTitle').textContent = title; $('alarmText').textContent = body; $('alarmPop').hidden = false;
+  beep();
+  try { if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]); } catch(e){}
+  try {
+    if ('Notification' in window && Notification.permission === 'granted'){
+      var opts = {body:body, icon:'icon-192.png', tag:'urq-aviso'};
+      if (navigator.serviceWorker && navigator.serviceWorker.controller){ navigator.serviceWorker.ready.then(function(r){ r.showNotification(title, opts); }); }
+      else new Notification(title, opts);
+    }
+  } catch(e){}
+}
+function checkAlarm(){
+  var a = store.get('urq.alarm', null); if (!a) return;
+  var now = Date.now();
+  if (now > a.ts + 2*60000){ store.set('urq.alarm', null); render(); return; }
+  if (!a.fired && now >= a.ts - a.lead*60000){ a.fired = true; store.set('urq.alarm', a); fireAlarm(a); }
 }
 
 function renderTrip(ctx, sel, o, d){
@@ -788,7 +976,7 @@ function fillStations(q){
   $('stations').classList.toggle('filtering', !!nq);
   $('stations').innerHTML = items.length ? items.map(function(x){
     var mini = x.i === other ? (S.sheetFor === 'from' ? 'destino' : 'origen') : '';
-    return '<li><button type="button" data-st="' + x.i + '"' + (x.i === mine ? ' class="cur" aria-current="true"' : '') + '><span class="sdot" aria-hidden="true"></span>' + esc(x.s[0]) + (mini ? '<span class="mini">' + mini + '</span>' : '') + '</button></li>';
+    return '<li><button type="button" data-st="' + x.i + '"' + (x.i === mine ? ' class="cur" aria-current="true"' : '') + '><span class="sdot" aria-hidden="true"></span>' + esc(x.s[0]) + (mini ? '<span class="mini">' + mini + '</span>' : '') + (POS ? '<span class="dist">' + fmtDist(distKm([POS.lat, POS.lng], COORDS[x.i])) + '</span>' : '') + '</button></li>';
   }).join('') : '<li class="msg" style="padding:12px 18px">No encontré esa estación.</li>';
 }
 
@@ -862,7 +1050,41 @@ $('at').addEventListener('change', function(){
   var v = this.value; if (!v) return;
   var p = v.split(':'); S.at = (+p[0]) * 60 + (+p[1]); S.pick = null; S._scrolled = false; render();
 });
-$('nowBtn').addEventListener('click', function(){ S.at = null; S.day = 'hoy'; S.pick = null; render(); });
+$('nowBtn').addEventListener('click', function(){ S.at = null; S.day = 'hoy'; S.mode = 'salgo'; S.pick = null; render(); });
+$('modeSel').addEventListener('change', function(){
+  S.mode = this.value; S.pick = null; S._scrolled = false;
+  if (S.mode === 'llego' && S.at === null){ var m = Math.ceil((nowBA().min + 60) / 5) * 5; S.at = m % 1440; }
+  render();
+});
+$('locateBtn').addEventListener('click', function(){
+  if (!navigator.geolocation){ toast('Este navegador no deja usar la ubicación.'); return; }
+  toast('Buscando tu ubicación…');
+  navigator.geolocation.getCurrentPosition(function(p){
+    POS = {lat:p.coords.latitude, lng:p.coords.longitude};
+    var best = 0, bd = 1e9;
+    COORDS.forEach(function(c, i){ var dd = distKm([POS.lat, POS.lng], c); if (dd < bd){ bd = dd; best = i; } });
+    lastInfoHtml = '';
+    if (bd > 15){ toast('La estación más cercana es ' + ST[best][0] + ', a ' + fmtDist(bd) + '.'); render(); return; }
+    if (best === S.to) S.to = best === 0 ? N-1 : 0;
+    S.from = best; changed();
+    toast('La más cercana es ' + ST[best][0] + ', a ' + fmtDist(bd) + '.');
+  }, function(err){
+    toast(err && err.code === 1 ? 'No diste permiso para usar tu ubicación.' : 'No pude encontrar tu ubicación.');
+  }, {enableHighAccuracy:true, timeout:12000, maximumAge:60000});
+});
+document.addEventListener('click', function(e){
+  var b = e.target.closest('[data-alarm]'); if (!b) return;
+  var kind = b.getAttribute('data-alarm');
+  if (kind === 'off') clearAlarm();
+  else if (kind === 'hero') setAlarm(S._hero);
+  else if (kind === 'sel') setAlarm(S._sel);
+});
+document.addEventListener('change', function(e){
+  if (e.target && e.target.id === 'leadSel'){ S.lead = +e.target.value; store.set('urq.lead', S.lead); lastInfoHtml = ''; render(); }
+});
+$('alarmOk').addEventListener('click', clearAlarm);
+function showOnline(){ $('offlineNote').hidden = navigator.onLine !== false; }
+window.addEventListener('online', showOnline); window.addEventListener('offline', showOnline); showOnline();
 $('moreBtn').addEventListener('click', function(){ S.showAll = !S.showAll; S._scrolled = false; render(); });
 $('lineBtn').addEventListener('click', function(){ S.fullLine = !S.fullLine; render(); });
 $('list').addEventListener('click', function(e){
@@ -895,7 +1117,16 @@ writeHash();
 render();
 render();
 setupAds();
+if (CF_ANALYTICS_TOKEN){
+  var cf = document.createElement('script'); cf.defer = true; cf.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+  cf.setAttribute('data-cf-beacon', JSON.stringify({token:CF_ANALYTICS_TOKEN})); document.body.appendChild(cf);
+}
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')){
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+}
 setInterval(function(){ if (S.at === null && !S.sheetFor) render(); }, 15000);
+setInterval(checkAlarm, 5000);
+checkAlarm();
 })();
 </script>
 </body>

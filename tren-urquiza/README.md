@@ -14,6 +14,12 @@ Nombres de estación para el link: lacroze, artigas, arata, beiro, libertador, d
 - Cuando Google AdSense apruebe el sitio, completá `ADS_CLIENT` y `ADS_SLOTS` en `index.html` (buscá «ANUNCIOS»).
 - AdSense necesita un `ads.txt` en la raíz del dominio, así que para cobrar anuncios conviene tener un dominio propio.
 
+## Contador de visitas
+
+- Usa Cloudflare Web Analytics (gratis, sin cookies).
+- Crear una cuenta en Cloudflare, ir a Web Analytics, agregar el sitio y copiar el token.
+- Pegarlo en `CF_ANALYTICS_TOKEN` dentro de `index.html` (buscá «CONTADOR DE VISITAS»).
+
 ## Datos
 
 Horarios del cuadro oficial «Invierno 2026» de Metrovías, vigente desde el 2 de marzo de 2026. Página no oficial: pueden variar ±3 minutos.
