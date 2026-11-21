@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tren Urquiza horarios</title>
 <meta name="description" content="Próximo tren Urquiza al instante: cuándo sale, cuánto tarda y por dónde va, entre Federico Lacroze y General Lemos. Horarios de invierno 2026 para días hábiles, sábados, domingos y feriados.">
-<meta name="theme-color" content="#0a8577">
+<meta name="theme-color" content="#eef2f0">
+<meta name="color-scheme" content="light only">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -22,9 +23,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Doto:wght@800;900&display=swap">
 <style>
-/* Plan: una columna en el celular (elegir viaje → próximo tren → lista → recorrido → info);
+/* Plan (siempre en claro): una columna en el celular (elegir viaje → próximo tren → lista → recorrido → info);
    en pantallas anchas, el viaje y los trenes a la izquierda y el recorrido a la derecha.
    El tablero ámbar del andén es lo único llamativo; el resto es tranquilo y muy legible. */
 :root{
@@ -39,22 +39,9 @@
   --board:#0c1211;
   --board-ink:#c4d0cd;
   --font-body:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-led:"Doto", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   --rowh:36px;
   --radius:16px;
   color-scheme:light;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#0c1211; --surface:#141e1c; --ink:#e6eeec; --muted:#93a5a1; --rule:#25332f;
-    --line:#2fc2b0; --line-soft:#15332f; --board:#050807; --board-ink:#aebcb8;
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0c1211; --surface:#141e1c; --ink:#e6eeec; --muted:#93a5a1; --rule:#25332f;
-  --line:#2fc2b0; --line-soft:#15332f; --board:#050807; --board-ink:#aebcb8;
-  color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -88,13 +75,13 @@ h1,h2,h3{text-wrap:balance;margin:0}
 
 /* elegir viaje */
 .route{position:relative;display:grid;gap:8px}
-.pick{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:4px 12px;width:100%;text-align:left;border:1px solid var(--rule);background:var(--bg);border-radius:12px;padding:10px 64px 10px 14px;min-height:62px}
+.pick{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:2px 12px;width:100%;text-align:left;border:1px solid var(--rule);background:var(--bg);border-radius:12px;padding:8px 60px 8px 14px;min-height:54px}
 .pick:hover{border-color:var(--line)}
-.pick .lab{grid-column:2;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.pick .st{grid-column:2;font-size:20px;font-weight:700;line-height:1.15}
+.pick .lab{grid-column:2;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pick .st{grid-column:2;font-size:18px;font-weight:700;line-height:1.15}
 .pick .pin{grid-row:1 / span 2;width:14px;height:14px;border-radius:50%;border:4px solid var(--line);background:var(--surface)}
 .pick.to .pin{background:var(--line)}
-.route::before{content:"";position:absolute;left:21px;top:42px;bottom:42px;width:4px;background:var(--line);border-radius:2px;opacity:.35}
+.route::before{content:"";position:absolute;left:21px;top:38px;bottom:38px;width:4px;background:var(--line);border-radius:2px;opacity:.35}
 .swap{position:absolute;right:12px;top:50%;margin-top:-23px;width:46px;height:46px;border-radius:50%;border:1px solid var(--rule);background:var(--surface);font-size:21px;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .swap:hover{border-color:var(--line)}
 .recents{display:flex;gap:8px;overflow-x:auto;padding:12px 2px 2px;scrollbar-width:none}
@@ -103,7 +90,7 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .chip:hover{border-color:var(--line)}
 .recents .lbl{flex:none;align-self:center;font-size:13px;color:var(--muted);padding-right:2px}
 
-.when{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--rule);font-size:15px}
+.when{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--rule);font-size:15px}
 .when-txt{display:inline-flex;align-items:center;gap:8px;color:var(--muted)}
 .when-txt b{color:var(--ink)}
 .dotlive{width:9px;height:9px;border-radius:50%;background:var(--line);box-shadow:0 0 0 3px var(--line-soft)}
@@ -121,25 +108,26 @@ h1,h2,h3{text-wrap:balance;margin:0}
   background-image:radial-gradient(rgba(255,255,255,.045) 1px, transparent 1.2px);background-size:6px 6px}
 .eyebrow{display:flex;justify-content:space-between;gap:10px;font-size:13px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
 .eyebrow .r{color:#fff;letter-spacing:.02em;text-transform:none;font-size:15px;text-align:right}
-.big{display:flex;align-items:baseline;gap:10px;margin:8px 0 2px;font-family:var(--font-led);font-weight:900;color:var(--led);line-height:.95;text-shadow:0 0 18px rgba(255,178,28,.35)}
-.big .n{font-size:clamp(78px,24vw,112px)}
-.big .u{font-size:clamp(30px,8vw,40px)}
-.big.word .n{font-size:clamp(56px,16vw,80px)}
-.hero-line{font-size:18px;color:#fff;margin-top:4px}
+.big{display:flex;align-items:baseline;gap:8px;margin:6px 0 2px;font-weight:700;color:var(--led);line-height:1;letter-spacing:-.02em}
+.big .n{font-size:clamp(60px,17vw,84px)}
+.big .u{font-size:clamp(24px,6.4vw,30px);letter-spacing:0}
+.big.word .n{font-size:clamp(48px,13vw,64px)}
+.hero-line{font-size:18px;color:#fff;margin-top:6px}
 .hero-line b{color:var(--led)}
 .hero-line .sep{color:var(--board-ink);padding:0 4px}
-.after{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px dashed rgba(255,255,255,.18);font-size:15px}
+.after{display:grid;gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed rgba(255,255,255,.18);font-size:15px}
+.after .chips{display:flex;flex-wrap:wrap;gap:8px}
 .after .k{text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:700}
-.after .t{background:rgba(255,255,255,.07);border-radius:8px;padding:5px 10px;color:#fff;font-weight:700}
+.after .t{background:rgba(255,255,255,.08);border-radius:8px;padding:6px 10px;color:#fff;font-weight:700;font-size:16px}
 .after .t small{font-weight:400;color:var(--board-ink);margin-left:4px}
 .note{font-size:13px;color:var(--board-ink);margin-top:10px}
 .flip{animation:flip .45s ease-out}
 @keyframes flip{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 
 /* lista */
-.head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
+.head{display:grid;gap:2px;margin-bottom:6px}
 h2{font-size:14px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
-.facts{font-size:14px;color:var(--muted);text-align:right}
+.facts{font-size:14px;color:var(--muted)}
 ol.trains{list-style:none;margin:0;padding:0}
 .trow{width:100%;display:grid;grid-template-columns:auto auto auto minmax(0,1fr) auto;align-items:baseline;gap:8px;padding:12px 8px;border:0;border-top:1px solid var(--rule);background:transparent;text-align:left}
 ol.trains li:first-child .trow{border-top:0}
@@ -263,7 +251,7 @@ dialog.sheet::backdrop{background:rgba(5,10,9,.55)}
       <div class="recents" id="recents" hidden></div>
       <div class="when">
         <span class="when-txt" id="whenTxt"></span>
-        <button class="linkbtn" id="whenBtn" type="button" aria-expanded="false" aria-controls="whenPanel">Cambiar día u hora</button>
+        <button class="linkbtn" id="whenBtn" type="button" aria-expanded="false" aria-controls="whenPanel" aria-label="Cambiar día u hora">Cambiar</button>
       </div>
       <div class="when-panel" id="whenPanel" hidden>
         <div class="seg" id="days" role="group" aria-label="Qué horario usar"></div>
@@ -555,8 +543,8 @@ function renderPicker(ctx){
   }).join('') : '';
   var todayType = typeOf(ctx.today);
   var label = ctx.auto ? 'Hoy, ' + DAYLONG[todayType] : 'Horario de ' + DAYLONG[ctx.type];
-  $('whenTxt').innerHTML = (S.at === null && ctx.auto ? '<i class="dotlive" aria-hidden="true"></i>' : '') + '<span><b>' + esc(label) + '</b> · ' + (S.at === null ? 'ahora ' + hhmm(Math.floor(ctx.now.min)) : 'desde las ' + hhmm(S.at)) + '</span>';
-  $('whenBtn').textContent = S.whenOpen ? 'Listo' : 'Cambiar día u hora';
+  $('whenTxt').innerHTML = (S.at === null && ctx.auto ? '<i class="dotlive" aria-hidden="true"></i>' : '') + '<span><b>' + esc(label) + '</b> · ' + (S.at === null ? hhmm(Math.floor(ctx.now.min)) : 'desde las ' + hhmm(S.at)) + '</span>';
+  $('whenBtn').textContent = S.whenOpen ? 'Listo' : 'Cambiar';
   $('whenBtn').setAttribute('aria-expanded', String(S.whenOpen));
   $('whenPanel').hidden = !S.whenOpen;
   var days = [['hoy','Hoy (' + DAYNAME[todayType] + ')'],['habil','Hábil'],['sabado','Sábado'],['domingo','Domingo'],['feriado','Feriado']];
@@ -594,16 +582,16 @@ function render(){
       '<span class="sep">·</span>llega <b class="tab">' + hhmm(next.arr) + '</b><span class="sep">·</span><b>' + next.dur + ' min</b>';
     var af = upcoming.slice(1, 3);
     $('bAfter').hidden = af.length === 0;
-    $('bAfter').innerHTML = '<span class="k">Después</span>' + af.map(function(x){
+    $('bAfter').innerHTML = '<span class="k">Después</span><div class="chips">' + af.map(function(x){
       return '<span class="t tab">' + hhmm(x.dep) + (live ? '<small>' + esc(untilTxt(x.dep - ctx.ref)) + '</small>' : '') + '</span>';
-    }).join('');
+    }).join('') + '</div>';
   } else {
     big.classList.add('word');
     $('bKicker').textContent = 'Sin más trenes';
     $('bNum').textContent = 'Fin'; $('bUnit').textContent = '';
     $('bLine').textContent = 'No hay más trenes ese ' + DAYLONG[ctx.type] + ' después de las ' + hhmm(ctx.ref) + '.';
     $('bAfter').hidden = dayTrips.length === 0;
-    $('bAfter').innerHTML = dayTrips.length ? '<span class="k">El primero</span><span class="t tab">' + hhmm(dayTrips[0].dep) + '</span>' : '';
+    $('bAfter').innerHTML = dayTrips.length ? '<span class="k">El primero</span><div class="chips"><span class="t tab">' + hhmm(dayTrips[0].dep) + '</span></div>' : '';
   }
 
   /* datos rápidos */
