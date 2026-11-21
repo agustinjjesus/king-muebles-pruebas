@@ -185,6 +185,14 @@ ol.trains li:first-child .trow{border-top:0}
 .lg-same{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid var(--carbon);display:inline-block}
 .lg-opp{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:9px solid var(--riel);display:inline-block}
 
+/* avisos de Metrovías */
+.avisos-h{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sec-h.sm{font-size:19px}
+.avisos-h .small{margin:2px 0 0}
+.avisos-box{margin-top:12px}
+.avisos-box .twitter-timeline{display:block;padding:12px 0;color:var(--riel)}
+.avisos-fuente{margin:8px 0 0}
+
 /* pasala */
 .pasala{display:grid;gap:10px;padding:16px;border-radius:14px;background:var(--papel);border-left:6px solid var(--mostaza)}
 .pasala p{margin:0;font-size:18px;font-weight:700;font-stretch:92%;line-height:1.3}
@@ -300,6 +308,20 @@ dialog.sheet::backdrop{background:rgba(34,41,43,.5)}
       <div class="despues" id="bAfter"></div>
       <div class="recent" id="bRecent" hidden></div>
       <div class="nota">El horario oficial puede variar ±3 minutos.</div>
+    </section>
+
+    <section class="panel avisos" aria-label="Avisos de Metrovías">
+      <div class="avisos-h">
+        <div>
+          <h2 class="sec-h sm">Avisos de Metrovías</h2>
+          <p class="small">Demoras, servicio limitado o cortes, como los publica Metrovías en X.</p>
+        </div>
+        <button class="btn btn-alt" id="avisosBtn" type="button" aria-expanded="false" aria-controls="avisosBox">Ver avisos</button>
+      </div>
+      <div class="avisos-box" id="avisosBox" hidden>
+        <div id="avisosFeed"></div>
+        <p class="small avisos-fuente">Si no se ven, abrilos directo en <a href="https://x.com/Metrovias">x.com/Metrovias</a>.</p>
+      </div>
     </section>
 
     <section class="panel">
@@ -769,6 +791,23 @@ function fillStations(q){
     return '<li><button type="button" data-st="' + x.i + '"' + (x.i === mine ? ' class="cur" aria-current="true"' : '') + '><span class="sdot" aria-hidden="true"></span>' + esc(x.s[0]) + (mini ? '<span class="mini">' + mini + '</span>' : '') + '</button></li>';
   }).join('') : '<li class="msg" style="padding:12px 18px">No encontré esa estación.</li>';
 }
+
+/* ---------- avisos de Metrovías (X) ---------- */
+var avisosLoaded = false;
+function setAvisos(open){
+  $('avisosBox').hidden = !open;
+  $('avisosBtn').textContent = open ? 'Ocultar' : 'Ver avisos';
+  $('avisosBtn').setAttribute('aria-expanded', String(open));
+  store.set('urq.avisos', open ? 1 : 0);
+  if (!open || avisosLoaded) return;
+  avisosLoaded = true;
+  $('avisosFeed').innerHTML = '<a class="twitter-timeline" data-lang="es" data-dnt="true" data-height="480" data-chrome="noborders transparent" href="https://twitter.com/Metrovias">Cargando los avisos de @Metrovias…</a>';
+  var sc = document.createElement('script');
+  sc.async = true; sc.charset = 'utf-8'; sc.src = 'https://platform.twitter.com/widgets.js';
+  document.body.appendChild(sc);
+}
+$('avisosBtn').addEventListener('click', function(){ setAvisos($('avisosBox').hidden); });
+if (store.get('urq.avisos', 0) === 1) setAvisos(true);
 
 /* ---------- anuncios ---------- */
 function setupAds(){
